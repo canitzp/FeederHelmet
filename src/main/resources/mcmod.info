@@ -1,0 +1,16 @@
+[
+{
+  "modid": "feederhelmet",
+  "name": "FeederHelmet",
+  "description": "",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["canitzp", "Gamer025"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
