@@ -78,9 +78,17 @@ public class FeederHelmet {
                 .forEach(item -> reg.getRegistry().register(new ShapelessRecipes(MODID + ":feeder_" + item.getUnlocalizedName(), new ItemStack(item), NonNullList.from(Ingredient.EMPTY, Ingredient.fromItems(item), Ingredient.fromItem(feederModule))){
                     @Nonnull
                     @Override
-                    public ItemStack getRecipeOutput() {
-                        ItemStack out = super.getRecipeOutput();
-                        NBTTagCompound nbt = out.hasTagCompound() ? out.getTagCompound() : new NBTTagCompound();
+                    public ItemStack getCraftingResult(InventoryCrafting inv) {
+                        NBTTagCompound nbt = new NBTTagCompound();
+                        for(int i = 0; i < inv.getSizeInventory(); i++) {
+                            ItemStack stack = inv.getStackInSlot(i);
+                            if (!stack.isEmpty() && stack.getItem() instanceof ItemArmor) {
+                                if(stack.hasTagCompound()){
+                                    nbt = stack.getTagCompound();
+                                }
+                            }
+                        }
+                        ItemStack out = super.getCraftingResult(inv);
                         nbt.setBoolean("AutoFeederHelmet", true);
                         out.setTagCompound(nbt);
                         return out;
