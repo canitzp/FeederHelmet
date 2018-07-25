@@ -1,2 +1,5 @@
+1.1.0:
+    -Fix: NBT gets removed from the helmets when their get crafted (Fixes #2)
+
 1.0.0:
     -Initial version

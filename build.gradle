@@ -17,7 +17,7 @@ archivesBaseName = "FeederHelmet"
 sourceCompatibility = targetCompatibility = "1.8"
 
 minecraft {
-    version = "1.12.2-14.23.3.2666"
+    version = "1.12.2-14.23.4.2720-4627"
     runDir = "run"
     mappings = "snapshot_20180415"
 
