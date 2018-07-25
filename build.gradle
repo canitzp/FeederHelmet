@@ -26,11 +26,14 @@ minecraft {
 }
 
 repositories {
-    
+    maven { //JEI
+        url "http://dvs1.progwml6.com/files/maven"
+    }
 }
 
 dependencies {
-    
+    //deobfProvided "mezz.jei:jei_${project.jei_version}:api"
+    runtime "mezz.jei:jei_${project.jei_version}"
 }
 
 processResources
