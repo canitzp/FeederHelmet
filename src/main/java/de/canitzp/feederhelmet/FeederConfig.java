@@ -1,13 +1,22 @@
 package de.canitzp.feederhelmet;
 
 import net.minecraftforge.common.config.Config;
+import net.minecraftforge.common.config.ConfigManager;
+import net.minecraftforge.fml.client.event.ConfigChangedEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-import java.util.ArrayList;
-import java.util.List;
-
+@Mod.EventBusSubscriber(modid = FeederHelmet.MODID)
 @Config.LangKey("config." + FeederHelmet.MODID + ":config.name")
 @Config(modid = FeederHelmet.MODID)
 public class FeederConfig {
+
+    @SubscribeEvent
+    public static void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent event){
+        if(FeederHelmet.MODID.equals(event.getModID())){
+            ConfigManager.sync(event.getModID(), Config.Type.INSTANCE);
+        }
+    }
 
     @Config.Comment("How much durability should the helmet use for every food eaten.")
     @Config.Name("Durability necessary")
@@ -31,5 +40,23 @@ public class FeederConfig {
     @Config.Name("Additional crafting items")
     @Config.RequiresMcRestart
     public static String[] ADD_CRAFT_ITEMS = new String[0];
+
+    @Config.Comment("The here stated items can't be used as FeederHelmet")
+    @Config.Name("Helmet blacklist")
+    @Config.RequiresMcRestart
+    public static String[] HELMET_BLACKLIST = new String[0];
+
+    @Config.Comment("The here stated items can be used as Feeder Helmet, even when they aren't helmets at all (You can't put everything in you helmet slot)")
+    @Config.Name("Helmet Whitelist")
+    @Config.RequiresMcRestart
+    public static String[] HELMET_WHITELIST = new String[0];
+
+    @Config.Comment("All here stated items aren't consumable by the FeederHelmet")
+    @Config.Name("Food blacklist")
+    public static String[] FOOD_BLACKLIST = new String[0];
+
+    @Config.Comment("All here stated items are additionally to all default items eatable. This can be very dangerous, because it is possible that the helmet doesn't eat it, but uses it!!!")
+    @Config.Name("Food whitelist")
+    public static String[] FOOD_WHITELIST = new String[0];
 
 }

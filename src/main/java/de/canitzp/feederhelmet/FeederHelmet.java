@@ -1,9 +1,7 @@
 package de.canitzp.feederhelmet;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.inventory.InventoryCrafting;
@@ -32,6 +30,7 @@ import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.oredict.ShapedOreRecipe;
+import org.apache.commons.lang3.ArrayUtils;
 
 import javax.annotation.Nonnull;
 
@@ -89,8 +88,7 @@ public class FeederHelmet {
             }
         }
         ForgeRegistries.ITEMS.getValuesCollection().stream()
-                .filter(item -> item instanceof ItemArmor)
-                .filter(item -> ((ItemArmor) item).armorType == EntityEquipmentSlot.HEAD)
+                .filter(FeederHelmet::isItemHelmet)
                 .forEach(item -> {
                     NonNullList<Ingredient> copy = NonNullList.create();
                     copy.addAll(ingredients);
@@ -164,8 +162,15 @@ public class FeederHelmet {
         }
     }
 
+    private static boolean isItemHelmet(Item item){
+        return (item instanceof ItemArmor && ((ItemArmor) item).armorType == EntityEquipmentSlot.HEAD && !ArrayUtils.contains(FeederConfig.HELMET_BLACKLIST, item.getRegistryName().toString())) || ArrayUtils.contains(FeederConfig.HELMET_WHITELIST, item.getRegistryName().toString());
+    }
+
     private static boolean isStackEatable(ItemStack stack){
-        return !stack.isEmpty() && (stack.getItem() instanceof ItemFood);
+        return !stack.isEmpty() &&
+                (stack.getItem() instanceof ItemFood ||
+                        ArrayUtils.contains(FeederConfig.FOOD_WHITELIST, stack.getItem().getRegistryName().toString())) &&
+                !ArrayUtils.contains(FeederConfig.FOOD_BLACKLIST, stack.getItem().getRegistryName().toString());
     }
 
     private static boolean canWork(ItemStack stack){

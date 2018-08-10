@@ -1,3 +1,6 @@
+1.2.0:
+    -Added Configs for everything
+
 1.1.0:
     -Fix: NBT gets removed from the helmets when their get crafted (Fixes #2)
 
