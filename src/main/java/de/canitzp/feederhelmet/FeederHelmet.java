@@ -21,6 +21,7 @@ import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.event.entity.player.AnvilRepairEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
@@ -147,15 +148,15 @@ public class FeederHelmet {
                 }
             }
             if(canWork(helmet) && autoFeeder && event.player.canEat(false)){
-                helmet.setItemDamage(helmet.getItemDamage() + FeederConfig.DURABILITY);
-                if(helmet.getMaxDamage() - helmet.getItemDamage() <= 0){
-                    helmet.setCount(0);
-                }
                 event.player.inventory.mainInventory.stream()
                         .filter(FeederHelmet::isStackEatable)
                         .forEach(stack -> {
                             if(event.player.canEat(false)){
                                 stack.getItem().onItemUseFinish(stack, event.player.world, event.player);
+                                helmet.setItemDamage(helmet.getItemDamage() + FeederConfig.DURABILITY);
+                                if(helmet.getMaxDamage() - helmet.getItemDamage() <= 0){
+                                    helmet.setCount(0);
+                                }
                             }
                         });
             }
@@ -178,6 +179,23 @@ public class FeederHelmet {
             return (stack.getMaxDamage() - stack.getItemDamage()) > FeederConfig.DURABILITY;
         }
         return true;
+    }
+    
+    @SubscribeEvent
+    public static void anvilRepair(AnvilRepairEvent event){
+        ItemStack toRepair = event.getItemInput();
+        if(toRepair.hasTagCompound()){
+            if(toRepair.getTagCompound().hasKey("AutoFeederHelmet", Constants.NBT.TAG_BYTE)){
+                ItemStack result = event.getItemResult();
+                if(result.hasTagCompound()){
+                    result.getTagCompound().setBoolean("AutoFeederHelmet", toRepair.getTagCompound().getBoolean("AutoFeederHelmet"));
+                } else {
+                    NBTTagCompound nbt = new NBTTagCompound();
+                    nbt.setBoolean("AutoFeederHelmet", toRepair.getTagCompound().getBoolean("AutoFeederHelmet"));
+                    result.setTagCompound(nbt);
+                }
+            }
+        }
     }
 
 }
