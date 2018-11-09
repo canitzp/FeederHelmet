@@ -18,12 +18,17 @@ public class FeederConfig {
         }
     }
 
-    @Config.Comment("How much durability should the helmet use for every food eaten.")
+    @Config.Comment("How much durability should the helmet use for every food eaten. Unpowered helmets")
     @Config.Name("Durability necessary")
     @Config.RangeInt(min = 0, max = 64)
     public static int DURABILITY = 1;
+    
+    @Config.Comment("How much energy should the helmet use for every food eaten, when it is a powered helmet.")
+    @Config.Name("Energy necessary")
+    @Config.RangeInt(min = 0, max = 5000)
+    public static int ENERGY_CONSUPTION = 10;
 
-    @Config.Comment("Can the helmet break while feeding? If this is false, the helmet stops feeding you when durability to low.")
+    @Config.Comment("Can the helmet break while feeding? If this is false, the helmet stops feeding you when durability to low. Only when the helmet isn't powered by Energy.")
     @Config.Name("Can break helmet")
     public static boolean CAN_BREAK_HELMET = false;
 

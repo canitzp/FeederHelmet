@@ -1,3 +1,7 @@
+1.4.0:
+    -Feeding now consume the Energy of a helmet if present
+    -The config 'DURABILITY' now works like the tooltip says
+
 1.3.0:
     -Fixed #7 (Helmets consume all durability when no food is found)
     -If feeder helmets are repaired in an anvil, the feeder modules aren't destroyed

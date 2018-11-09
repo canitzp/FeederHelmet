@@ -2,6 +2,7 @@ package de.canitzp.feederhelmet;
 
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.inventory.InventoryCrafting;
@@ -20,6 +21,8 @@ import net.minecraft.world.World;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.energy.CapabilityEnergy;
+import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.player.AnvilRepairEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
@@ -34,32 +37,34 @@ import net.minecraftforge.oredict.ShapedOreRecipe;
 import org.apache.commons.lang3.ArrayUtils;
 
 import javax.annotation.Nonnull;
+import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * @author canitzp
  */
 @Mod.EventBusSubscriber
 @Mod(modid = FeederHelmet.MODID, name = FeederHelmet.MODNAME, version = FeederHelmet.MODVERSION, acceptedMinecraftVersions = FeederHelmet.MC_VERSIONS)
-public class FeederHelmet {
-
+public class FeederHelmet{
+    
     public static final String MODID = "feederhelmet";
     public static final String MODNAME = "FeederHelmet";
     public static final String MODVERSION = "@Version@";
     public static final String MC_VERSIONS = "1.12,1.12.1,1.12.2";
-
+    
     public static final ItemFeederModule feederModule = new ItemFeederModule();
-
+    
     @SubscribeEvent
     public static void registerItems(RegistryEvent.Register<Item> reg){
         reg.getRegistry().register(feederModule);
     }
-
+    
     @SideOnly(Side.CLIENT)
     @SubscribeEvent
     public static void registerModels(ModelRegistryEvent event){
         ModelLoader.setCustomModelResourceLocation(feederModule, 0, new ModelResourceLocation(feederModule.getRegistryName(), "inventory"));
     }
-
+    
     @SideOnly(Side.CLIENT)
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void renderTooltips(ItemTooltipEvent event){
@@ -70,113 +75,142 @@ public class FeederHelmet {
             }
         }
     }
-
+    
     @SubscribeEvent
     public static void registerRecipes(RegistryEvent.Register<IRecipe> reg){
         if(FeederConfig.HARD_MODULE_RECIPE){
             reg.getRegistry().register(new ShapedOreRecipe(feederModule.getRegistryName(), feederModule, " r ", "sbs", "iii", 'r', Items.BLAZE_ROD, 's', "logWood", 'b', "chest", 'i', "blockIron").setRegistryName(feederModule.getRegistryName()));
-        } else {
+        }else{
             reg.getRegistry().register(new ShapedOreRecipe(feederModule.getRegistryName(), feederModule, " s ", "sbs", "iii", 's', "stickWood", 'b', Items.BOWL, 'i', "ingotIron").setRegistryName(feederModule.getRegistryName()));
         }
         NonNullList<Ingredient> ingredients = NonNullList.create();
         ingredients.add(Ingredient.fromItem(feederModule));
         String[] add_craft_items = FeederConfig.ADD_CRAFT_ITEMS;
-        for (int i = 0; i < Math.min(add_craft_items.length, 7); i++) {
-            String s = add_craft_items[i];
-            Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(s));
-            if (item != null) {
-                ingredients.add(Ingredient.fromItem(item));
-            }
-        }
+        Arrays.stream(add_craft_items)
+              .limit(7)
+              .map(s -> ForgeRegistries.ITEMS.getValue(new ResourceLocation(s)))
+              .filter(Objects::nonNull)
+              .map(Ingredient::fromItem)
+              .forEach(ingredients::add);
         ForgeRegistries.ITEMS.getValuesCollection().stream()
-                .filter(FeederHelmet::isItemHelmet)
-                .forEach(item -> {
-                    NonNullList<Ingredient> copy = NonNullList.create();
-                    copy.addAll(ingredients);
-                    copy.add(Ingredient.fromItem(item));
-                    ItemStack out = new ItemStack(item);
-                    NBTTagCompound nbt = new NBTTagCompound();
-                    nbt.setBoolean("AutoFeederHelmet", true);
-                    out.setTagCompound(nbt);
-                    reg.getRegistry().register(new ShapelessRecipes(MODID + ":feeder_" + item.getUnlocalizedName(), out, copy){
-                        @Nonnull
-                        @Override
-                        public ItemStack getCraftingResult(InventoryCrafting inv) {
-                            NBTTagCompound nbt = new NBTTagCompound();
-                            for(int i = 0; i < inv.getSizeInventory(); i++) {
-                                ItemStack stack = inv.getStackInSlot(i);
-                                if (!stack.isEmpty() && stack.getItem() instanceof ItemArmor) {
-                                    if(stack.hasTagCompound()){
-                                        nbt = stack.getTagCompound();
-                                    }
-                                }
-                            }
-                            ItemStack out = super.getCraftingResult(inv);
-                            nbt.setBoolean("AutoFeederHelmet", true);
-                            out.setTagCompound(nbt);
-                            return out;
-                        }
-
-                        @Override
-                        public boolean matches(InventoryCrafting inv, World worldIn) {
-                            if(super.matches(inv, worldIn)){
-                                for(int i = 0; i < inv.getSizeInventory(); i++){
-                                    ItemStack stack = inv.getStackInSlot(i);
-                                    if(!stack.isEmpty() && stack.getItem() instanceof ItemArmor){
-                                        NBTTagCompound nbt = stack.getTagCompound();
-                                        if(nbt != null && nbt.hasKey("AutoFeederHelmet", Constants.NBT.TAG_BYTE)){
-                                            return false;
-                                        }
-                                    }
-                                }
-                            }
-                            return super.matches(inv, worldIn);
-                        }
-                    }.setRegistryName(MODID, "feeder_" + item.getUnlocalizedName()));
-                });
+                             .filter(FeederHelmet::isItemHelmet)
+                             .forEach(item -> {
+                                 NonNullList<Ingredient> copy = NonNullList.create();
+                                 copy.addAll(ingredients);
+                                 copy.add(Ingredient.fromItem(item));
+                                 ItemStack out = new ItemStack(item);
+                                 NBTTagCompound nbt = new NBTTagCompound();
+                                 nbt.setBoolean("AutoFeederHelmet", true);
+                                 out.setTagCompound(nbt);
+                                 reg.getRegistry().register(new ShapelessRecipes(MODID + ":feeder_" + item.getUnlocalizedName(), out, copy){
+                                     @Nonnull
+                                     @Override
+                                     public ItemStack getCraftingResult(InventoryCrafting inv){
+                                         NBTTagCompound nbt = new NBTTagCompound();
+                                         for(int i = 0; i < inv.getSizeInventory(); i++){
+                                             ItemStack stack = inv.getStackInSlot(i);
+                                             if(!stack.isEmpty() && stack.getItem() instanceof ItemArmor){
+                                                 if(stack.hasTagCompound()){
+                                                     nbt = stack.getTagCompound();
+                                                 }
+                                             }
+                                         }
+                                         ItemStack out = super.getCraftingResult(inv);
+                                         nbt.setBoolean("AutoFeederHelmet", true);
+                                         out.setTagCompound(nbt);
+                                         return out;
+                                     }
+    
+                                     @Override
+                                     public boolean matches(InventoryCrafting inv, World worldIn){
+                                         if(super.matches(inv, worldIn)){
+                                             for(int i = 0; i < inv.getSizeInventory(); i++){
+                                                 ItemStack stack = inv.getStackInSlot(i);
+                                                 if(!stack.isEmpty() && stack.getItem() instanceof ItemArmor){
+                                                     NBTTagCompound nbt = stack.getTagCompound();
+                                                     if(nbt != null && nbt.hasKey("AutoFeederHelmet", Constants.NBT.TAG_BYTE)){
+                                                         return false;
+                                                     }
+                                                 }
+                                             }
+                                         }
+                                         return super.matches(inv, worldIn);
+                                     }
+                                 }.setRegistryName(MODID, "feeder_" + item.getUnlocalizedName()));
+                             });
     }
-
+    
     @SubscribeEvent
     public static void updatePlayer(TickEvent.PlayerTickEvent event){
         if(event.phase == TickEvent.Phase.END && event.player.getEntityWorld().getTotalWorldTime() % FeederConfig.WAIT_TICKS == 0){
-            ItemStack helmet = event.player.inventory.armorInventory.get(EntityEquipmentSlot.HEAD.getIndex());
+            InventoryPlayer inv = event.player.inventory;
+            ItemStack helmet = inv.armorInventory.get(EntityEquipmentSlot.HEAD.getIndex());
             boolean autoFeeder = false;
-            if(!helmet.isEmpty() && helmet.hasTagCompound()){
+            if(!helmet.isEmpty() && helmet.hasTagCompound() && isItemHelmet(helmet.getItem())){
                 NBTTagCompound nbt = helmet.getTagCompound();
                 if(nbt.hasKey("AutoFeederHelmet", Constants.NBT.TAG_BYTE)){
                     autoFeeder = true;
                 }
             }
-            if(canWork(helmet) && autoFeeder && event.player.canEat(false)){
-                event.player.inventory.mainInventory.stream()
-                        .filter(FeederHelmet::isStackEatable)
-                        .forEach(stack -> {
-                            if(event.player.canEat(false)){
-                                stack.getItem().onItemUseFinish(stack, event.player.world, event.player);
-                                helmet.setItemDamage(helmet.getItemDamage() + FeederConfig.DURABILITY);
-                                if(helmet.getMaxDamage() - helmet.getItemDamage() <= 0){
-                                    helmet.setCount(0);
-                                }
-                            }
-                        });
+            if(autoFeeder && event.player.canEat(false) && canWork(helmet)){
+                inv.mainInventory.stream()
+                                 .filter(FeederHelmet::isStackEatable)
+                                 .forEach(stack -> {
+                                     if(event.player.canEat(false)){
+                                         boolean canEat = false;
+                                         if(helmet.hasCapability(CapabilityEnergy.ENERGY, null)){
+                                             IEnergyStorage energy = helmet.getCapability(CapabilityEnergy.ENERGY, null);
+                                             if(energy != null){
+                                                 if(energy.extractEnergy(FeederConfig.ENERGY_CONSUPTION, true) == FeederConfig.ENERGY_CONSUPTION){
+                                                     energy.extractEnergy(FeederConfig.ENERGY_CONSUPTION, false);
+                                                     canEat = true;
+                                                 }
+                                             }
+                                         }else if(helmet.isItemStackDamageable()){
+                                             helmet.setItemDamage(helmet.getItemDamage() + FeederConfig.DURABILITY);
+                                             if(helmet.getMaxDamage() - helmet.getItemDamage() <= 0){
+                                                 helmet.setCount(0);
+                                             }
+                                             canEat = true;
+                                         }
+                                         if(canEat){
+                                             stack.getItem().onItemUseFinish(stack, event.player.world, event.player);
+                                         }
+                                     }
+                                 });
             }
         }
     }
-
+    
     private static boolean isItemHelmet(Item item){
-        return (item instanceof ItemArmor && ((ItemArmor) item).armorType == EntityEquipmentSlot.HEAD && !ArrayUtils.contains(FeederConfig.HELMET_BLACKLIST, item.getRegistryName().toString())) || ArrayUtils.contains(FeederConfig.HELMET_WHITELIST, item.getRegistryName().toString());
+        return
+            (
+                item instanceof ItemArmor
+                    && ((ItemArmor) item).armorType == EntityEquipmentSlot.HEAD
+                    && !ArrayUtils.contains(FeederConfig.HELMET_BLACKLIST, item.getRegistryName().toString())
+            )
+                || ArrayUtils.contains(FeederConfig.HELMET_WHITELIST, item.getRegistryName().toString());
     }
-
-    private static boolean isStackEatable(ItemStack stack){
-        return !stack.isEmpty() &&
-                (stack.getItem() instanceof ItemFood ||
-                        ArrayUtils.contains(FeederConfig.FOOD_WHITELIST, stack.getItem().getRegistryName().toString())) &&
-                !ArrayUtils.contains(FeederConfig.FOOD_BLACKLIST, stack.getItem().getRegistryName().toString());
+    
+    private static boolean isStackEatable(@Nonnull ItemStack stack){
+        return
+            !stack.isEmpty()
+                && !ArrayUtils.contains(FeederConfig.FOOD_BLACKLIST, stack.getItem().getRegistryName().toString())
+                &&
+                (
+                    stack.getItem() instanceof ItemFood
+                        || ArrayUtils.contains(FeederConfig.FOOD_WHITELIST, stack.getItem().getRegistryName().toString())
+                );
     }
-
-    private static boolean canWork(ItemStack stack){
-        if(stack.isItemStackDamageable() && !FeederConfig.CAN_BREAK_HELMET){
-            return (stack.getMaxDamage() - stack.getItemDamage()) > FeederConfig.DURABILITY;
+    
+    private static boolean canWork(@Nonnull ItemStack stack){
+        if(stack.hasCapability(CapabilityEnergy.ENERGY, null)){
+            IEnergyStorage energy = stack.getCapability(CapabilityEnergy.ENERGY, null);
+            return energy != null && energy.extractEnergy(FeederConfig.ENERGY_CONSUPTION, true) == FeederConfig.ENERGY_CONSUPTION;
+        }
+        if(stack.isItemStackDamageable()){
+            int newDmg = stack.getItemDamage() + FeederConfig.DURABILITY;
+            return newDmg < stack.getMaxDamage() || FeederConfig.CAN_BREAK_HELMET;
         }
         return true;
     }
@@ -184,12 +218,12 @@ public class FeederHelmet {
     @SubscribeEvent
     public static void anvilRepair(AnvilRepairEvent event){
         ItemStack toRepair = event.getItemInput();
-        if(toRepair.hasTagCompound()){
+        if(toRepair.hasTagCompound() && !toRepair.hasCapability(CapabilityEnergy.ENERGY, null)){
             if(toRepair.getTagCompound().hasKey("AutoFeederHelmet", Constants.NBT.TAG_BYTE)){
                 ItemStack result = event.getItemResult();
                 if(result.hasTagCompound()){
                     result.getTagCompound().setBoolean("AutoFeederHelmet", toRepair.getTagCompound().getBoolean("AutoFeederHelmet"));
-                } else {
+                }else{
                     NBTTagCompound nbt = new NBTTagCompound();
                     nbt.setBoolean("AutoFeederHelmet", toRepair.getTagCompound().getBoolean("AutoFeederHelmet"));
                     result.setTagCompound(nbt);
@@ -197,5 +231,5 @@ public class FeederHelmet {
             }
         }
     }
-
+    
 }
