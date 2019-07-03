@@ -1,67 +1,77 @@
 package de.canitzp.feederhelmet;
 
-import net.minecraftforge.common.config.Config;
-import net.minecraftforge.common.config.ConfigManager;
-import net.minecraftforge.fml.client.event.ConfigChangedEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.common.ForgeConfigSpec;
 
-@Mod.EventBusSubscriber(modid = FeederHelmet.MODID)
-@Config.LangKey("config." + FeederHelmet.MODID + ":config.name")
-@Config(modid = FeederHelmet.MODID)
+import java.util.ArrayList;
+import java.util.List;
+
 public class FeederConfig {
+    
+    private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
+    public static final General GENERAL = new General(BUILDER);
+    public static final ForgeConfigSpec spec = BUILDER.build();
 
-    @SubscribeEvent
-    public static void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent event){
-        if(FeederHelmet.MODID.equals(event.getModID())){
-            ConfigManager.sync(event.getModID(), Config.Type.INSTANCE);
+    public static class General {
+        public final ForgeConfigSpec.ConfigValue<Integer> DURABILITY;
+        public final ForgeConfigSpec.ConfigValue<Integer> ENERGY_CONSUMPTION;
+        public final ForgeConfigSpec.ConfigValue<Integer> WAIT_TICKS;
+        public final ForgeConfigSpec.ConfigValue<Boolean> CAN_BREAK;
+        public final ForgeConfigSpec.ConfigValue<Boolean> WAIT_UNITL_FILL_ALL_HUNGER;
+        public final ForgeConfigSpec.ConfigValue<List<String>> ADD_CRAFT_ITEMS;
+        public final ForgeConfigSpec.ConfigValue<List<String>> HELMET_BLACKLIST;
+        public final ForgeConfigSpec.ConfigValue<List<String>> HELMET_WHITELIST;
+        public final ForgeConfigSpec.ConfigValue<List<String>> FOOD_BLACKLIST;
+        public final ForgeConfigSpec.ConfigValue<List<String>> FOOD_WHITELIST;
+    
+        public General(ForgeConfigSpec.Builder builder) {
+            builder.push("General");
+            DURABILITY = builder
+                .comment("How much durability should the helmet use for every food eaten, when it is a unpowered helmet.")
+                .translation("Durability necessary")
+                .defineInRange("durability_consumption", 1, 0, 64);
+            ENERGY_CONSUMPTION = builder
+                .comment("How much energy should the helmet use for every food eaten, when it is a powered helmet.")
+                .translation("Energy necessary")
+                .defineInRange("energy_consumption", 10, 0, 5000);
+            CAN_BREAK = builder
+                .comment("Can the helmet break while feeding? If this is false, the helmet stops feeding you when durability to low. Only when the helmet isn't powered by Energy.")
+                .translation("Can break helmet")
+                .define("can_helmet_break", false);
+            WAIT_TICKS = builder
+                .comment("Defines how much ticks are between food checks. 20 ticks = 1 second")
+                .translation("Ticks between inventory scan")
+                .defineInRange("feed_ticks", 20, 1, 200);
+            WAIT_UNITL_FILL_ALL_HUNGER = builder
+                .comment("Should the helmet wait until the food can be eaten completely, without any hunger loss by early eating?")
+                .translation("Wait until hungry enough")
+                .define("hungry_enough_wait", true);
+            ADD_CRAFT_ITEMS = builder
+                .comment("Put additional items to craft a helmet with a module in here. Up to 7")
+                .translation("Additional crafting items")
+                .worldRestart()
+                .define("additional_crafting_items", new ArrayList<>());
+            HELMET_BLACKLIST = builder
+                .comment("The here stated items can't be used as FeederHelmet")
+                .translation("Helmet blacklist")
+                .worldRestart()
+                .define("helmet_blacklist", new ArrayList<>());
+            HELMET_WHITELIST = builder
+                .comment("The here stated items can be used as Feeder Helmet, even when they aren't helmets at all (You can't put everything in you helmet slot)")
+                .translation("Helmet Whitelist")
+                .worldRestart()
+                .define("helmet_whitelist", new ArrayList<>());
+            FOOD_BLACKLIST = builder
+                .comment("All here stated items aren't consumable by the FeederHelmet")
+                .translation("Food blacklist")
+                .worldRestart()
+                .define("food_blacklist", new ArrayList<>());
+            FOOD_WHITELIST = builder
+                .comment("All here stated items are additionally to all default items eatable. This can be very dangerous, because it is possible that the helmet doesn't eat it, but uses it!!!")
+                .translation("Food whitelist")
+                .worldRestart()
+                .define("food_whitelist", new ArrayList<>());
+            builder.pop();
         }
     }
-
-    @Config.Comment("How much durability should the helmet use for every food eaten. Unpowered helmets")
-    @Config.Name("Durability necessary")
-    @Config.RangeInt(min = 0, max = 64)
-    public static int DURABILITY = 1;
     
-    @Config.Comment("How much energy should the helmet use for every food eaten, when it is a powered helmet.")
-    @Config.Name("Energy necessary")
-    @Config.RangeInt(min = 0, max = 5000)
-    public static int ENERGY_CONSUPTION = 10;
-
-    @Config.Comment("Can the helmet break while feeding? If this is false, the helmet stops feeding you when durability to low. Only when the helmet isn't powered by Energy.")
-    @Config.Name("Can break helmet")
-    public static boolean CAN_BREAK_HELMET = false;
-
-    @Config.Comment("Uses more end game items to craft the feeder module.")
-    @Config.Name("Hard module recipe")
-    @Config.RequiresMcRestart
-    public static boolean HARD_MODULE_RECIPE = false;
-
-    @Config.Comment("Defines how much ticks are between food checks. 20 ticks = 1 second")
-    @Config.Name("Ticks between inventory scan")
-    public static int WAIT_TICKS = 20;
-
-    @Config.Comment("Put additional items to craft a helmet with a module in here. Up to 7")
-    @Config.Name("Additional crafting items")
-    @Config.RequiresMcRestart
-    public static String[] ADD_CRAFT_ITEMS = new String[0];
-
-    @Config.Comment("The here stated items can't be used as FeederHelmet")
-    @Config.Name("Helmet blacklist")
-    @Config.RequiresMcRestart
-    public static String[] HELMET_BLACKLIST = new String[0];
-
-    @Config.Comment("The here stated items can be used as Feeder Helmet, even when they aren't helmets at all (You can't put everything in you helmet slot)")
-    @Config.Name("Helmet Whitelist")
-    @Config.RequiresMcRestart
-    public static String[] HELMET_WHITELIST = new String[0];
-
-    @Config.Comment("All here stated items aren't consumable by the FeederHelmet")
-    @Config.Name("Food blacklist")
-    public static String[] FOOD_BLACKLIST = new String[0];
-
-    @Config.Comment("All here stated items are additionally to all default items eatable. This can be very dangerous, because it is possible that the helmet doesn't eat it, but uses it!!!")
-    @Config.Name("Food whitelist")
-    public static String[] FOOD_WHITELIST = new String[0];
-
 }

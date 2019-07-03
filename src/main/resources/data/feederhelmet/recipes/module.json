@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " s ",
+    "sbs",
+    "iii"
+  ],
+  "key": {
+    "s": {
+      "item": "minecraft:stick"
+    },
+    "b": {
+      "item": "minecraft:bowl"
+    },
+    "i": {
+      "tag": "forge:ingots/iron"
+    }
+  },
+  "result": {
+    "item": "feederhelmet:feeder_helmet_module"
+  }
+}

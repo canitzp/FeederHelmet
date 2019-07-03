@@ -1,3 +1,7 @@
+1.5.0:
+    -Update to 1.13
+    -New config 'hungry_enough_wait': it waits until no food value is wasted before feeding. default enabled
+
 1.4.0:
     -Feeding now consume the Energy of a helmet if present
     -The config 'DURABILITY' now works like the tooltip says
