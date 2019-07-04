@@ -4,8 +4,7 @@ import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.*;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
@@ -24,6 +23,6 @@ public class ItemFeederModule extends Item {
     @Override
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
         super.addInformation(stack, worldIn, tooltip, flagIn);
-        tooltip.add(new TextComponentTranslation("item.feederhelmet:feeder_helmet_module.desc"));
+        tooltip.add(new TranslationTextComponent("item.feederhelmet:feeder_helmet_module.desc").setStyle(new Style().setColor(TextFormatting.GRAY)));
     }
 }
