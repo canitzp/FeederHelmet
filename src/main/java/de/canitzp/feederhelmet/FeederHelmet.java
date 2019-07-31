@@ -23,6 +23,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.energy.CapabilityEnergy;
+import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.player.AnvilRepairEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
@@ -136,7 +137,7 @@ public class FeederHelmet{
                                              return super.matches(inv, worldIn);
                                          }
                                      };
-                                     if(recipeManager.func_215378_c().noneMatch(resourceLocation -> resourceLocation.equals(craftingId))){
+                                     if(recipeManager.getKeys().noneMatch(resourceLocation -> resourceLocation.equals(craftingId))){
                                          recipesToInject.put(craftingId, recipe);
                                      }
                                  });
@@ -183,7 +184,9 @@ public class FeederHelmet{
                                                  canEat.set(true);
                                              }
                                              if(canEat.get()){
-                                                 stack.getItem().onItemUseFinish(stack, event.player.world, event.player);
+                                                 ForgeEventFactory.onItemUseStart(event.player, stack, 0);
+                                                 ItemStack result = stack.getItem().onItemUseFinish(stack, event.player.world, event.player);
+                                                 ForgeEventFactory.onItemUseFinish(event.player, stack, 0, result);
                                              }
                                          }
                                      });
