@@ -17,7 +17,7 @@ public class ItemFeederModule extends Item {
 
     public ItemFeederModule(){
         this.setRegistryName(FeederHelmet.MODID, "feeder_helmet_module");
-        this.setUnlocalizedName(this.getRegistryName().toString());
+        this.setTranslationKey(this.getRegistryName().toString());
         this.setCreativeTab(CreativeTabs.TOOLS);
         this.setMaxStackSize(1);
     }

@@ -23,6 +23,7 @@ import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
+import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.player.AnvilRepairEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
@@ -102,7 +103,7 @@ public class FeederHelmet{
                                  NBTTagCompound nbt = new NBTTagCompound();
                                  nbt.setBoolean("AutoFeederHelmet", true);
                                  out.setTagCompound(nbt);
-                                 reg.getRegistry().register(new ShapelessRecipes(MODID + ":feeder_" + item.getUnlocalizedName(), out, copy){
+                                 reg.getRegistry().register(new ShapelessRecipes(MODID + ":feeder_" + item.getTranslationKey(), out, copy){
                                      @Nonnull
                                      @Override
                                      public ItemStack getCraftingResult(InventoryCrafting inv){
@@ -136,7 +137,7 @@ public class FeederHelmet{
                                          }
                                          return super.matches(inv, worldIn);
                                      }
-                                 }.setRegistryName(MODID, "feeder_" + item.getUnlocalizedName()));
+                                 }.setRegistryName(MODID, "feeder_" + item.getTranslationKey()));
                              });
     }
     
@@ -174,7 +175,9 @@ public class FeederHelmet{
                                              canEat = true;
                                          }
                                          if(canEat){
-                                             stack.getItem().onItemUseFinish(stack, event.player.world, event.player);
+                                             ForgeEventFactory.onItemUseStart(event.player, stack, 0);
+                                             ItemStack result = stack.getItem().onItemUseFinish(stack, event.player.world, event.player);
+                                             ForgeEventFactory.onItemUseFinish(event.player, stack, 0, result);
                                          }
                                      }
                                  });

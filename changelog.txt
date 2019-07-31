@@ -1,3 +1,6 @@
+1.4.1:
+    -Adding Item use finish and start event to be more compatible with mods like Nutrition
+
 1.4.0:
     -Feeding now consume the Energy of a helmet if present
     -The config 'DURABILITY' now works like the tooltip says
