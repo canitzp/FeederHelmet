@@ -12,14 +12,14 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'maven-publish'
 apply plugin: 'idea'
 
-version = "1.6.2"
+version = "1.7.0"
 group= "de.canitzp.feederhelmet"
 archivesBaseName = "FeederHelmet"
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
 
 minecraft {
-    mappings channel: 'snapshot', version: '20190719-1.14.3'
+    mappings channel: 'snapshot', version: '20191217-1.14.3'
 
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
@@ -55,8 +55,8 @@ repositories {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.14.4-28.1.0'
-    implementation fg.deobf("mezz.jei:jei-1.14.4:6.0.0.18")
+    minecraft 'net.minecraftforge:forge:1.15.1-30.0.7'
+    //implementation fg.deobf("mezz.jei:jei-1.14.4:6.0.0.18")
 }
 
 jar {

@@ -8,14 +8,12 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ArmorItem;
-import net.minecraft.item.Food;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.item.*;
 import net.minecraft.item.crafting.*;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
@@ -49,6 +47,27 @@ public class FeederHelmet{
     public static final String MODID = "feederhelmet";
     
     public static final ItemFeederModule feederModule = new ItemFeederModule();
+    
+    public static final ItemGroup TAB = new ItemGroup(MODID){
+        @Override
+        public ItemStack createIcon(){
+            return new ItemStack(feederModule);
+        }
+    
+        @Override
+        public void fill(NonNullList<ItemStack> stacks){
+            stacks.add(new ItemStack(feederModule));
+            for(Item item : ForgeRegistries.ITEMS){
+                if(FeederHelmet.isItemHelmet(item)){
+                    ItemStack stack = new ItemStack(item);
+                    CompoundNBT tag = new CompoundNBT();
+                    tag.putBoolean("AutoFeederHelmet", true);
+                    stack.setTag(tag);
+                    stacks.add(stack);
+                }
+            }
+        }
+    };
     
     public FeederHelmet(){
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, FeederConfig.spec);

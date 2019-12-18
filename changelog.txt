@@ -1,3 +1,7 @@
+1.7.0:
+    - Update to 1.15.1, still compatible with 1.14
+    - Added a creative tag, where every possible helmet and the feeder module is located
+
 1.6.2:
     -Fixes #12, crash on load when forge version is above 1.14.4-28.0.45 due to the package movement of TickEvent
 

@@ -2,7 +2,6 @@ package de.canitzp.feederhelmet;
 
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.*;
 import net.minecraft.world.World;
@@ -16,7 +15,7 @@ import java.util.List;
 public class ItemFeederModule extends Item {
 
     public ItemFeederModule(){
-        super(new Properties().group(ItemGroup.TOOLS).maxStackSize(1));
+        super(new Properties().group(FeederHelmet.TAB).maxStackSize(1));
         this.setRegistryName(FeederHelmet.MODID, "feeder_helmet_module");
     }
 
