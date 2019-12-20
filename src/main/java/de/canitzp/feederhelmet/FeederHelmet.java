@@ -2,6 +2,7 @@ package de.canitzp.feederhelmet;
 
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.EntityEquipmentSlot;
@@ -52,6 +53,27 @@ public class FeederHelmet{
     public static final String MODNAME = "FeederHelmet";
     public static final String MODVERSION = "@Version@";
     public static final String MC_VERSIONS = "1.12,1.12.1,1.12.2";
+    
+    public static final CreativeTabs TAB = new CreativeTabs(MODID){
+        @Override
+        public ItemStack createIcon(){
+            return new ItemStack(feederModule);
+        }
+    
+        @Override
+        public void displayAllRelevantItems(NonNullList<ItemStack> stacks){
+            stacks.add(new ItemStack(feederModule));
+            for(Item item : ForgeRegistries.ITEMS){
+                if(isItemHelmet(item)){
+                    ItemStack helmet = new ItemStack(item);
+                    NBTTagCompound nbt = new NBTTagCompound();
+                    nbt.setBoolean("AutoFeederHelmet", true);
+                    helmet.setTagCompound(nbt);
+                    stacks.add(helmet);
+                }
+            }
+        }
+    };
     
     public static final ItemFeederModule feederModule = new ItemFeederModule();
     
