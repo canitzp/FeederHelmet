@@ -1,0 +1,6 @@
+{
+  "item.feederhelmet.feeder_helmet_module": "Модуль питания для шлема",
+  "item.feederhelmet:feeder_helmet_module.desc": "Создайте это вместе с любым шлемом, и вам никогда не придётся есть вручную.",
+  "item.feederhelmet:feeder_helmet_module_installed.text": "Режим автопринятия пищи",
+  "itemGroup.feederhelmet": "Шлем с автопринятием пищи"
+}
