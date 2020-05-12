@@ -19,7 +19,7 @@ archivesBaseName = "FeederHelmet"
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
 
 minecraft {
-    mappings channel: 'snapshot', version: '20191217-1.14.3'
+    mappings channel: 'snapshot', version: '20200511-1.15.1'
 
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
@@ -55,7 +55,7 @@ repositories {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.15.1-30.0.7'
+    minecraft 'net.minecraftforge:forge:1.15.2-31.1.0'
     //implementation fg.deobf("mezz.jei:jei-1.14.4:6.0.0.18")
 }
 
