@@ -1,3 +1,6 @@
+1.8.0:
+    - Update to 1.16.1 (Forge BETA: 1.16.1-32.0.7), doesn't work with 1.15.x or 1.14.4 anymore :(
+
 1.7.0:
     - Update to 1.15.1, still compatible with 1.14
     - Added a creative tag, where every possible helmet and the feeder module is located

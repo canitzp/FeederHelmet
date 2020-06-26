@@ -32,6 +32,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
@@ -41,10 +43,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * @author canitzp
  */
+@Mod.EventBusSubscriber
 @Mod(FeederHelmet.MODID)
 public class FeederHelmet{
     
     public static final String MODID = "feederhelmet";
+    
+    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
     
     public static final ItemFeederModule feederModule = new ItemFeederModule();
     
@@ -71,16 +76,10 @@ public class FeederHelmet{
     
     public FeederHelmet(){
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, FeederConfig.spec);
-    }
-    
-    @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
-    public static class ModEvents{
-    
-        @SubscribeEvent
-        public static void registerItems(RegistryEvent.Register<Item> reg){
-            reg.getRegistry().register(feederModule);
-        }
-    
+        
+        ITEMS.register("feeder_helmet_module", () -> feederModule);
+        
+        ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
     }
     
     @Mod.EventBusSubscriber

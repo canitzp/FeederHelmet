@@ -16,12 +16,12 @@ public class ItemFeederModule extends Item {
 
     public ItemFeederModule(){
         super(new Properties().group(FeederHelmet.TAB).maxStackSize(1));
-        this.setRegistryName(FeederHelmet.MODID, "feeder_helmet_module");
+        //this.setRegistryName(FeederHelmet.MODID, "feeder_helmet_module");
     }
 
     @Override
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
         super.addInformation(stack, worldIn, tooltip, flagIn);
-        tooltip.add(new TranslationTextComponent("item.feederhelmet:feeder_helmet_module.desc").setStyle(new Style().setColor(TextFormatting.GRAY)));
+        tooltip.add(new TranslationTextComponent("item.feederhelmet:feeder_helmet_module.desc").func_230530_a_(Style.field_240709_b_.func_240721_b_(TextFormatting.GRAY)));
     }
 }
