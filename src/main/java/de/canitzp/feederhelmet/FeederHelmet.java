@@ -16,6 +16,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -98,72 +99,77 @@ public class FeederHelmet{
         
         @SubscribeEvent
         public static void onWorldLoad(WorldEvent.Load event){
-            RecipeManager recipeManager = event.getWorld().getWorld().getRecipeManager();
-            NonNullList<Ingredient> ingredients = NonNullList.create();
-            ingredients.add(Ingredient.fromItems(feederModule));
-            List<String> add_craft_items = FeederConfig.GENERAL.ADD_CRAFT_ITEMS.get();
-            add_craft_items.stream()
-                  .limit(7)
-                  .map(s -> ForgeRegistries.ITEMS.getValue(new ResourceLocation(s)))
-                  .filter(Objects::nonNull)
-                  .map(Ingredient::fromItems)
-                  .forEach(ingredients::add);
-            Map<ResourceLocation, IRecipe<?>> recipesToInject = new HashMap<>();
-            ForgeRegistries.ITEMS.getValues().stream()
-                                 .filter(FeederHelmet::isItemHelmet)
-                                 .forEach(helmet -> {
-                                     NonNullList<Ingredient> ingredientsCopy = NonNullList.create();
-                                     ingredientsCopy.addAll(ingredients);
-                                     ingredientsCopy.add(Ingredient.fromItems(helmet));
-                                     ItemStack helmetStack = new ItemStack(helmet);
-                                     CompoundNBT nbt = new CompoundNBT();
-                                     nbt.putBoolean("AutoFeederHelmet", true);
-                                     helmetStack.setTag(nbt);
-                                     ResourceLocation craftingId = new ResourceLocation(MODID, "feederhelmet_" + helmet.getRegistryName().getPath());
-                                     ShapelessRecipe recipe = new ShapelessRecipe(craftingId, "", helmetStack, ingredientsCopy){
-                                         @Nonnull
-                                         @Override
-                                         public ItemStack getCraftingResult(CraftingInventory inv){
-                                             CompoundNBT nbt = new CompoundNBT();
-                                             for(int i = 0; i < inv.getSizeInventory(); i++){
-                                                 ItemStack stack = inv.getStackInSlot(i);
-                                                 if(!stack.isEmpty() && stack.getItem() instanceof ArmorItem){
-                                                     if(stack.hasTag()){
-                                                         nbt = stack.getTag();
-                                                     }
-                                                 }
-                                             }
-                                             ItemStack out = super.getCraftingResult(inv);
-                                             nbt.putBoolean("AutoFeederHelmet", true);
-                                             out.setTag(nbt);
-                                             return out;
-                                         }
-    
-                                         @Override
-                                         public boolean matches(CraftingInventory inv, World worldIn){
-                                             if(super.matches(inv, worldIn)){
+            IWorld iWorld = event.getWorld();
+            if(iWorld instanceof World){
+                World world = (World) iWorld;
+                RecipeManager recipeManager = world.getRecipeManager();
+                NonNullList<Ingredient> ingredients = NonNullList.create();
+                ingredients.add(Ingredient.fromItems(feederModule));
+                List<String> add_craft_items = FeederConfig.GENERAL.ADD_CRAFT_ITEMS.get();
+                add_craft_items.stream()
+                               .limit(7)
+                               .map(s -> ForgeRegistries.ITEMS.getValue(new ResourceLocation(s)))
+                               .filter(Objects::nonNull)
+                               .map(Ingredient::fromItems)
+                               .forEach(ingredients::add);
+                Map<ResourceLocation, IRecipe<?>> recipesToInject = new HashMap<>();
+                ForgeRegistries.ITEMS.getValues().stream()
+                                     .filter(FeederHelmet::isItemHelmet)
+                                     .forEach(helmet -> {
+                                         NonNullList<Ingredient> ingredientsCopy = NonNullList.create();
+                                         ingredientsCopy.addAll(ingredients);
+                                         ingredientsCopy.add(Ingredient.fromItems(helmet));
+                                         ItemStack helmetStack = new ItemStack(helmet);
+                                         CompoundNBT nbt = new CompoundNBT();
+                                         nbt.putBoolean("AutoFeederHelmet", true);
+                                         helmetStack.setTag(nbt);
+                                         ResourceLocation craftingId = new ResourceLocation(MODID, "feederhelmet_" + helmet.getRegistryName().getPath());
+                                         ShapelessRecipe recipe = new ShapelessRecipe(craftingId, "", helmetStack, ingredientsCopy){
+                                             @Nonnull
+                                             @Override
+                                             public ItemStack getCraftingResult(CraftingInventory inv){
+                                                 CompoundNBT nbt = new CompoundNBT();
                                                  for(int i = 0; i < inv.getSizeInventory(); i++){
                                                      ItemStack stack = inv.getStackInSlot(i);
                                                      if(!stack.isEmpty() && stack.getItem() instanceof ArmorItem){
-                                                         CompoundNBT nbt = stack.getTag();
-                                                         if(nbt != null && nbt.contains("AutoFeederHelmet", Constants.NBT.TAG_BYTE)){
-                                                             return false;
+                                                         if(stack.hasTag()){
+                                                             nbt = stack.getTag();
                                                          }
                                                      }
                                                  }
+                                                 ItemStack out = super.getCraftingResult(inv);
+                                                 nbt.putBoolean("AutoFeederHelmet", true);
+                                                 out.setTag(nbt);
+                                                 return out;
                                              }
-                                             return super.matches(inv, worldIn);
+            
+                                             @Override
+                                             public boolean matches(CraftingInventory inv, World worldIn){
+                                                 if(super.matches(inv, worldIn)){
+                                                     for(int i = 0; i < inv.getSizeInventory(); i++){
+                                                         ItemStack stack = inv.getStackInSlot(i);
+                                                         if(!stack.isEmpty() && stack.getItem() instanceof ArmorItem){
+                                                             CompoundNBT nbt = stack.getTag();
+                                                             if(nbt != null && nbt.contains("AutoFeederHelmet", Constants.NBT.TAG_BYTE)){
+                                                                 return false;
+                                                             }
+                                                         }
+                                                     }
+                                                 }
+                                                 return super.matches(inv, worldIn);
+                                             }
+                                         };
+                                         if(recipeManager.getKeys().noneMatch(resourceLocation -> resourceLocation.equals(craftingId))){
+                                             recipesToInject.put(craftingId, recipe);
                                          }
-                                     };
-                                     if(recipeManager.getKeys().noneMatch(resourceLocation -> resourceLocation.equals(craftingId))){
-                                         recipesToInject.put(craftingId, recipe);
-                                     }
-                                 });
-            Map<IRecipeType<?>, Map<ResourceLocation, IRecipe<?>>> map = new HashMap<>(recipeManager.recipes);
-            Map<ResourceLocation, IRecipe<?>> craftingRecipes = new HashMap<>(map.getOrDefault(IRecipeType.CRAFTING, Collections.emptyMap()));
-            craftingRecipes.putAll(recipesToInject);
-            map.put(IRecipeType.CRAFTING, ImmutableMap.copyOf(craftingRecipes));
-            recipeManager.recipes = ImmutableMap.copyOf(map);
+                                     });
+                Map<IRecipeType<?>, Map<ResourceLocation, IRecipe<?>>> map = new HashMap<>(recipeManager.recipes);
+                Map<ResourceLocation, IRecipe<?>> craftingRecipes = new HashMap<>(map.getOrDefault(IRecipeType.CRAFTING, Collections.emptyMap()));
+                craftingRecipes.putAll(recipesToInject);
+                map.put(IRecipeType.CRAFTING, ImmutableMap.copyOf(craftingRecipes));
+                recipeManager.recipes = ImmutableMap.copyOf(map);
+            }
+            
         }
     
         @SubscribeEvent
