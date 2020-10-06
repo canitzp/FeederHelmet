@@ -6,3 +6,4 @@ build/
 classes/
 run/
 runs_server/
+logs/

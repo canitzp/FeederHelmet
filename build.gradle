@@ -47,6 +47,19 @@ minecraft {
                 }
             }
         }
+
+        data {
+            workingDirectory project.file('run')
+            property 'forge.logging.console.level', 'debug'
+
+            args '--mod', 'examplemod', '--all', '--output', file('src/generated/resources/')
+
+            mods {
+                feederhelmet {
+                    source sourceSets.main
+                }
+            }
+        }
     }
 }
 
@@ -57,7 +70,7 @@ repositories {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.16.2-33.0.3'
+    minecraft 'net.minecraftforge:forge:1.16.3-34.1.0'
     implementation fg.deobf("mezz.jei:jei-${project.jei_version}")
 }
 
