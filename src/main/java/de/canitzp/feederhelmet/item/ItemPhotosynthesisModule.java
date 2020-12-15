@@ -1,5 +1,6 @@
-package de.canitzp.feederhelmet;
+package de.canitzp.feederhelmet.item;
 
+import de.canitzp.feederhelmet.FeederHelmet;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -9,19 +10,15 @@ import net.minecraft.world.World;
 import javax.annotation.Nullable;
 import java.util.List;
 
-/**
- * @author canitzp
- */
-public class ItemFeederModule extends Item {
-
-    public ItemFeederModule(){
+public class ItemPhotosynthesisModule extends Item {
+    
+    public ItemPhotosynthesisModule(){
         super(new Properties().group(FeederHelmet.TAB).maxStackSize(1));
-        //this.setRegistryName(FeederHelmet.MODID, "feeder_helmet_module");
     }
-
+    
     @Override
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
         super.addInformation(stack, worldIn, tooltip, flagIn);
-        tooltip.add(new TranslationTextComponent("item.feederhelmet:feeder_helmet_module.desc").func_230530_a_(Style.field_240709_b_.func_240721_b_(TextFormatting.GRAY)));
+        tooltip.add(new TranslationTextComponent("item.feederhelmet:photosynthesis_helmet_module.desc").setStyle(Style.EMPTY.setColor(Color.fromTextFormatting(TextFormatting.GRAY))));
     }
 }

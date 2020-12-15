@@ -1,19 +1,21 @@
 package de.canitzp.feederhelmet;
 
 import com.google.common.collect.ImmutableMap;
+import de.canitzp.feederhelmet.item.ItemFeederModule;
+import de.canitzp.feederhelmet.item.ItemPhotosynthesisModule;
+import mezz.jei.events.PlayerJoinedWorldEvent;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.command.arguments.NBTCompoundTagArgument;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.item.*;
 import net.minecraft.item.crafting.*;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.StringNBT;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.IWorld;
@@ -23,14 +25,15 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.AnvilRepairEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -51,175 +54,175 @@ public class FeederHelmet{
     public static final String MODID = "feederhelmet";
     
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
+    public static final RegistryObject<ItemFeederModule> FEEDER_HELMET_MODULE_ITEM = ITEMS.register("feeder_helmet_module", ItemFeederModule::new);
+    public static final RegistryObject<ItemPhotosynthesisModule> PHOTOSYNTHESIS_MODULE_ITEM = ITEMS.register("photosynthesis_helmet_module", ItemPhotosynthesisModule::new);
     
-    public static final ItemFeederModule feederModule = new ItemFeederModule();
+    public static final List<IHelmetModule> MODULES = new ArrayList<>();
     
     public static final ItemGroup TAB = new ItemGroup(MODID){
         @Override
         public ItemStack createIcon(){
-            return new ItemStack(feederModule);
+            return new ItemStack(FEEDER_HELMET_MODULE_ITEM.get());
         }
     
         @Override
         public void fill(NonNullList<ItemStack> stacks){
-            stacks.add(new ItemStack(feederModule));
-            for(Item item : ForgeRegistries.ITEMS){
-                if(FeederHelmet.isItemHelmet(item)){
-                    ItemStack stack = new ItemStack(item);
-                    CompoundNBT tag = new CompoundNBT();
-                    tag.putBoolean("AutoFeederHelmet", true);
-                    stack.setTag(tag);
-                    stacks.add(stack);
+            for(IHelmetModule module : MODULES){
+                stacks.add(new ItemStack(module.getCorrespondingModuleItem()));
+                for(Item item : ForgeRegistries.ITEMS){
+                    if(module.isModuleApplicableTo(item)){
+                        ItemStack stack = new ItemStack(item);
+                        CompoundNBT tag = new CompoundNBT();
+                        ListNBT modulesList = new ListNBT();
+                        modulesList.add(StringNBT.valueOf(module.getTagName()));
+                        tag.put("modules", modulesList);
+                        stack.setTag(tag);
+                        stacks.add(stack);
+                    }
                 }
             }
         }
     };
     
     public FeederHelmet(){
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, FeederConfig.spec);
+        MODULES.add(new FeederModule());
         
-        ITEMS.register("feeder_helmet_module", () -> feederModule);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, FeederConfig.spec);
         
         ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
     }
     
-    @Mod.EventBusSubscriber
-    public static class ForgeEvents{
-    
-        @OnlyIn(Dist.CLIENT)
-        @SubscribeEvent(priority = EventPriority.LOWEST)
-        public static void renderTooltips(ItemTooltipEvent event){
-            if(!event.getItemStack().isEmpty()){
-                CompoundNBT nbt = event.getItemStack().getTag();
-                if(nbt != null && nbt.contains("AutoFeederHelmet", Constants.NBT.TAG_BYTE)){
-                    event.getToolTip().add(new StringTextComponent(TextFormatting.YELLOW.toString() + TextFormatting.ITALIC.toString() + I18n.format("item.feederhelmet:feeder_helmet_module_installed.text") + TextFormatting.RESET.toString()));
-                }
-            }
-        }
-        
-        @SubscribeEvent
-        public static void onWorldLoad(WorldEvent.Load event){
-            IWorld iWorld = event.getWorld();
-            if(iWorld instanceof World){
-                World world = (World) iWorld;
-                RecipeManager recipeManager = world.getRecipeManager();
-                NonNullList<Ingredient> ingredients = NonNullList.create();
-                ingredients.add(Ingredient.fromItems(feederModule));
-                List<String> add_craft_items = FeederConfig.GENERAL.ADD_CRAFT_ITEMS.get();
-                add_craft_items.stream()
-                               .limit(7)
-                               .map(s -> ForgeRegistries.ITEMS.getValue(new ResourceLocation(s)))
-                               .filter(Objects::nonNull)
-                               .map(Ingredient::fromItems)
-                               .forEach(ingredients::add);
-                Map<ResourceLocation, IRecipe<?>> recipesToInject = new HashMap<>();
-                ForgeRegistries.ITEMS.getValues().stream()
-                                     .filter(FeederHelmet::isItemHelmet)
-                                     .forEach(helmet -> {
-                                         NonNullList<Ingredient> ingredientsCopy = NonNullList.create();
-                                         ingredientsCopy.addAll(ingredients);
-                                         ingredientsCopy.add(Ingredient.fromItems(helmet));
-                                         ItemStack helmetStack = new ItemStack(helmet);
-                                         CompoundNBT nbt = new CompoundNBT();
-                                         nbt.putBoolean("AutoFeederHelmet", true);
-                                         helmetStack.setTag(nbt);
-                                         ResourceLocation craftingId = new ResourceLocation(MODID, "feederhelmet_" + helmet.getRegistryName().getPath());
-                                         ShapelessRecipe recipe = new ShapelessRecipe(craftingId, "", helmetStack, ingredientsCopy){
-                                             @Nonnull
-                                             @Override
-                                             public ItemStack getCraftingResult(CraftingInventory inv){
-                                                 CompoundNBT nbt = new CompoundNBT();
-                                                 for(int i = 0; i < inv.getSizeInventory(); i++){
-                                                     ItemStack stack = inv.getStackInSlot(i);
-                                                     if(!stack.isEmpty() && stack.getItem() instanceof ArmorItem){
-                                                         if(stack.hasTag()){
-                                                             nbt = stack.getTag();
-                                                         }
-                                                     }
-                                                 }
-                                                 ItemStack out = super.getCraftingResult(inv);
-                                                 nbt.putBoolean("AutoFeederHelmet", true);
-                                                 out.setTag(nbt);
-                                                 return out;
-                                             }
-            
-                                             @Override
-                                             public boolean matches(CraftingInventory inv, World worldIn){
-                                                 if(super.matches(inv, worldIn)){
-                                                     for(int i = 0; i < inv.getSizeInventory(); i++){
-                                                         ItemStack stack = inv.getStackInSlot(i);
-                                                         if(!stack.isEmpty() && stack.getItem() instanceof ArmorItem){
-                                                             CompoundNBT nbt = stack.getTag();
-                                                             if(nbt != null && nbt.contains("AutoFeederHelmet", Constants.NBT.TAG_BYTE)){
-                                                                 return false;
-                                                             }
-                                                         }
-                                                     }
-                                                 }
-                                                 return super.matches(inv, worldIn);
-                                             }
-                                         };
-                                         if(recipeManager.getKeys().noneMatch(resourceLocation -> resourceLocation.equals(craftingId))){
-                                             recipesToInject.put(craftingId, recipe);
-                                         }
-                                     });
-                Map<IRecipeType<?>, Map<ResourceLocation, IRecipe<?>>> map = new HashMap<>(recipeManager.recipes);
-                Map<ResourceLocation, IRecipe<?>> craftingRecipes = new HashMap<>(map.getOrDefault(IRecipeType.CRAFTING, Collections.emptyMap()));
-                craftingRecipes.putAll(recipesToInject);
-                map.put(IRecipeType.CRAFTING, ImmutableMap.copyOf(craftingRecipes));
-                recipeManager.recipes = ImmutableMap.copyOf(map);
-            }
-            
-        }
-    
-        @SubscribeEvent
-        public static void updatePlayer(TickEvent.PlayerTickEvent event){
-            if(event.phase == TickEvent.Phase.END && event.player.getEntityWorld().getGameTime() % FeederConfig.GENERAL.WAIT_TICKS.get() == 0){
-                PlayerInventory inv = event.player.inventory;
-                ItemStack helmet = inv.armorInventory.get(EquipmentSlotType.HEAD.getIndex());
-                boolean autoFeeder = false;
-                if(!helmet.isEmpty() && helmet.hasTag() && isItemHelmet(helmet.getItem())){
-                    CompoundNBT nbt = helmet.getTag();
-                    if(nbt.contains("AutoFeederHelmet", Constants.NBT.TAG_BYTE)){
-                        autoFeeder = true;
-                    }
-                }
-                if(autoFeeder && event.player.canEat(false) && canWork(helmet)){
-                    inv.mainInventory.stream()
-                                     .filter(FeederHelmet::isStackEatable)
-                                     .filter(stack -> canPlayerEat(event.player, stack))
-                                     .forEach(stack -> {
-                                         if(event.player.canEat(false)){
-                                             AtomicBoolean hasEnergy = new AtomicBoolean(false);
-                                             AtomicBoolean canEat = new AtomicBoolean(false);
-                                             helmet.getCapability(CapabilityEnergy.ENERGY).ifPresent(energy -> {
-                                                 hasEnergy.set(true);
-                                                 int energyConsumption = FeederConfig.GENERAL.ENERGY_CONSUMPTION.get();
-                                                 if(energy.extractEnergy(energyConsumption, true) == energyConsumption){
-                                                     energy.extractEnergy(energyConsumption, false);
-                                                     canEat.set(true);
-                                                 }
-                                             });
-                                             if(!hasEnergy.get() && helmet.isDamageable()){
-                                                 helmet.setDamage(helmet.getDamage() + FeederConfig.GENERAL.DURABILITY.get());
-                                                 if(helmet.getMaxDamage() - helmet.getDamage() <= 0){
-                                                     helmet.setCount(0);
-                                                 }
-                                                 canEat.set(true);
-                                             }
-                                             if(canEat.get()){
-                                                 ForgeEventFactory.onItemUseStart(event.player, stack, 0);
-                                                 ItemStack result = stack.getItem().onItemUseFinish(stack, event.player.world, event.player);
-                                                 ForgeEventFactory.onItemUseFinish(event.player, stack, 0, result);
-                                             }
-                                         }
-                                     });
+    @OnlyIn(Dist.CLIENT)
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void renderTooltips(ItemTooltipEvent event){
+        if(!event.getItemStack().isEmpty()){
+            for(IHelmetModule module : MODULES){
+                if(NBTHelper.isModulePresent(module.getTagName(), event.getItemStack())){
+                    module.renderTooltip(event.getItemStack(), event.getPlayer(), event.getToolTip(), event.getFlags());
                 }
             }
         }
     }
     
-    private static boolean isItemHelmet(Item item){
+    @SubscribeEvent
+    public static void onWorldLoad(WorldEvent.Load event){
+        IWorld iWorld = event.getWorld();
+        if(iWorld instanceof World){
+            World world = (World) iWorld;
+            RecipeManager recipeManager = world.getRecipeManager();
+            
+            Map<ResourceLocation, IRecipe<?>> recipesToInject = new HashMap<>();
+            for(IHelmetModule module : MODULES){
+                for(Item helmet : ForgeRegistries.ITEMS.getValues()){
+                    if(module.isModuleApplicableTo(helmet)){
+                        NonNullList<Ingredient> recipeInputItems = NonNullList.create();
+                        recipeInputItems.add(Ingredient.fromItems(module.getCorrespondingModuleItem()));
+                        recipeInputItems.add(Ingredient.fromItems(helmet));
+                        
+                        ItemStack recipeOutputStack = new ItemStack(helmet);
+                        
+                        ResourceLocation craftingId = new ResourceLocation(MODID, module.getTagName() + "_" + helmet.getRegistryName().getPath());
+                        
+                        ShapelessRecipe recipe = new ShapelessRecipe(craftingId, "", recipeOutputStack, recipeInputItems) {
+                            @Nonnull
+                            @Override
+                            public ItemStack getCraftingResult(CraftingInventory inv){
+                                CompoundNBT nbt = new CompoundNBT();
+                                for(int i = 0; i < inv.getSizeInventory(); i++){
+                                    ItemStack stack = inv.getStackInSlot(i);
+                                    if(!stack.isEmpty() && stack.getItem() instanceof ArmorItem){
+                                        if(stack.hasTag()){
+                                            nbt = stack.getTag();
+                                        }
+                                    }
+                                }
+                                ItemStack out = super.getCraftingResult(inv);
+                                out.setTag(nbt);
+                                NBTHelper.addModule(module.getTagName(), out);
+                                return out;
+                            }
+                            
+                            // checks if the helmet doesn't already have the module
+                            @Override
+                            public boolean matches(CraftingInventory inv, World worldIn){
+                                if(super.matches(inv, worldIn)){
+                                    for(int i = 0; i < inv.getSizeInventory(); i++){
+                                        ItemStack stack = inv.getStackInSlot(i);
+                                        if(!stack.isEmpty() && stack.getItem() instanceof ArmorItem){
+                                            if(NBTHelper.isModulePresent(module.getTagName(), stack)){
+                                                return false;
+                                            }
+                                        }
+                                    }
+                                }
+                                return super.matches(inv, worldIn);
+                            }
+                        };
+                        if(recipeManager.getKeys().noneMatch(resourceLocation -> resourceLocation.equals(craftingId))){
+                            recipesToInject.put(craftingId, recipe);
+                        }
+                    }
+                }
+            }
+            Map<IRecipeType<?>, Map<ResourceLocation, IRecipe<?>>> map = new HashMap<>(recipeManager.recipes);
+            Map<ResourceLocation, IRecipe<?>> craftingRecipes = new HashMap<>(map.getOrDefault(IRecipeType.CRAFTING, Collections.emptyMap()));
+            craftingRecipes.putAll(recipesToInject);
+            map.put(IRecipeType.CRAFTING, ImmutableMap.copyOf(craftingRecipes));
+            recipeManager.recipes = ImmutableMap.copyOf(map);
+        }
+    }
+    
+    @SubscribeEvent
+    public static void updatePlayer(TickEvent.PlayerTickEvent event){
+        if(event.phase == TickEvent.Phase.END && event.player.getEntityWorld().getGameTime() % FeederConfig.GENERAL.WAIT_TICKS.get() == 0){
+            ItemStack helmetStack = event.player.inventory.armorInventory.get(EquipmentSlotType.HEAD.getIndex());
+            for(IHelmetModule module : MODULES){
+                if(NBTHelper.isModulePresent(module.getTagName(), helmetStack)){
+                    module.updatePlayer(event.player, helmetStack);
+                }
+            }
+        }
+    }
+    
+    // copy modules nbt from old to ew item stack
+    @SubscribeEvent
+    public static void anvilRepair(AnvilRepairEvent event){
+        ItemStack toRepair = event.getItemInput();
+        ItemStack result = event.getItemResult();
+        
+        if(toRepair.hasTag() && toRepair.getTag().contains("modules", Constants.NBT.TAG_LIST)){
+            CompoundNBT nbt = result.hasTag() ? result.getTag() : new CompoundNBT();
+            nbt.put("modules", toRepair.getTag().get("modules"));
+            result.setTag(nbt);
+        }
+    }
+    
+    @SubscribeEvent
+    public static void playerJoin(PlayerEvent.PlayerLoggedInEvent event){
+        PlayerEntity player = event.getPlayer();
+        NonNullList<ItemStack> armorInventory = player.inventory.armorInventory;
+        NonNullList<ItemStack> mainInventory = player.inventory.mainInventory;
+        NonNullList<ItemStack> offHandInventory = player.inventory.offHandInventory;
+        
+        NonNullList<ItemStack> mergedInventory = NonNullList.create();
+        mergedInventory.addAll(armorInventory);
+        mergedInventory.addAll(mainInventory);
+        mergedInventory.addAll(offHandInventory);
+    
+        for(ItemStack stack : mergedInventory){
+            if(stack.hasTag()){
+                CompoundNBT tag = stack.getTag();
+                if(tag.contains("AutoFeederHelmet", Constants.NBT.TAG_BYTE)){
+                    tag.remove("AutoFeederHelmet");
+                    ListNBT modules = tag.getList("modules", Constants.NBT.TAG_STRING);
+                    modules.add(StringNBT.valueOf("feeder_module"));
+                    tag.put("modules", modules);
+                }
+            }
+        }
+    }
+    
+    public static boolean isItemHelmet(Item item){
         return
             (
                 item instanceof ArmorItem
@@ -229,23 +232,7 @@ public class FeederHelmet{
                 || FeederConfig.GENERAL.HELMET_WHITELIST.get().contains(item.getRegistryName().toString());
     }
     
-    private static boolean isStackEatable(@Nonnull ItemStack stack){
-        return !stack.isEmpty()
-            && !FeederConfig.GENERAL.FOOD_BLACKLIST.get().contains(stack.getItem().getRegistryName().toString())
-            && (stack.getItem().isFood() || FeederConfig.GENERAL.FOOD_WHITELIST.get().contains(stack.getItem().getRegistryName().toString()));
-    }
-    
-    private static boolean canPlayerEat(PlayerEntity player, ItemStack stack){
-        if(!stack.isEmpty() && stack.getItem().isFood()){
-            if(FeederConfig.GENERAL.WAIT_UNITL_FILL_ALL_HUNGER.get()){
-                return player.getFoodStats().getFoodLevel() + stack.getItem().getFood().getHealing() <= 20;
-            }
-            return true;
-        }
-        return true;
-    }
-    
-    private static boolean canWork(@Nonnull ItemStack stack){
+    public static boolean canDamageBeReducedOrEnergyConsumed(@Nonnull ItemStack stack){
         AtomicBoolean canWork = new AtomicBoolean(false);
         
         stack.getCapability(CapabilityEnergy.ENERGY).ifPresent(energy -> {
@@ -259,23 +246,6 @@ public class FeederHelmet{
         }
         
         return canWork.get();
-    }
-    
-    @SubscribeEvent
-    public static void anvilRepair(AnvilRepairEvent event){
-        ItemStack toRepair = event.getItemInput();
-        if(toRepair.hasTag() && !toRepair.getCapability(CapabilityEnergy.ENERGY).isPresent()){
-            if(toRepair.getTag().contains("AutoFeederHelmet", Constants.NBT.TAG_BYTE)){
-                ItemStack result = event.getItemResult();
-                if(result.hasTag()){
-                    result.getTag().putBoolean("AutoFeederHelmet", toRepair.getTag().getBoolean("AutoFeederHelmet"));
-                }else{
-                    CompoundNBT nbt = new CompoundNBT();
-                    nbt.putBoolean("AutoFeederHelmet", toRepair.getTag().getBoolean("AutoFeederHelmet"));
-                    result.setTag(nbt);
-                }
-            }
-        }
     }
     
 }
