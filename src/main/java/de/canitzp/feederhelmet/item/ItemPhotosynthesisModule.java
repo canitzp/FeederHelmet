@@ -13,12 +13,12 @@ import java.util.List;
 public class ItemPhotosynthesisModule extends Item {
     
     public ItemPhotosynthesisModule(){
-        super(new Properties().group(FeederHelmet.TAB).maxStackSize(1));
+        super(new Properties().tab(FeederHelmet.TAB).stacksTo(1));
     }
     
     @Override
-    public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
-        super.addInformation(stack, worldIn, tooltip, flagIn);
-        tooltip.add(new TranslationTextComponent("item.feederhelmet:photosynthesis_helmet_module.desc").setStyle(Style.EMPTY.setColor(Color.fromTextFormatting(TextFormatting.GRAY))));
+    public void appendHoverText(ItemStack stack, @Nullable World world, List<ITextComponent> tooltip, ITooltipFlag flag) {
+        super.appendHoverText(stack, world, tooltip, flag);
+        tooltip.add(new TranslationTextComponent("item.feederhelmet:photosynthesis_helmet_module.desc").setStyle(Style.EMPTY.withColor(Color.fromLegacyFormat(TextFormatting.GRAY))));
     }
 }

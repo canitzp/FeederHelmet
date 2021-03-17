@@ -16,7 +16,7 @@ public class NBTHelper {
     public static boolean isModulePresent(String module, ItemStack stack){
         return stack.hasTag() && (stack.getTag().contains("modules", Constants.NBT.TAG_LIST)
             ? stack.getTag().getList("modules", Constants.NBT.TAG_STRING).stream()
-                   .map(INBT::getString)
+                   .map(INBT::getAsString)
                    .anyMatch(module::equals)
             : stack.getTag().getBoolean(module)); // todo change with breaking release
     }
@@ -34,7 +34,7 @@ public class NBTHelper {
     
     public static void addModule(String module, ItemStack stack){
         ListNBT listNBT = NBTHelper.getModulesList(stack);
-        if(listNBT.stream().map(INBT::getString).noneMatch(module::equals)){
+        if(listNBT.stream().map(INBT::getAsString).noneMatch(module::equals)){
             listNBT.add(StringNBT.valueOf(module));
         }
         NBTHelper.setModulesList(stack, listNBT);
@@ -44,7 +44,7 @@ public class NBTHelper {
         ListNBT newListNBT = new ListNBT();
         ListNBT currentListNBT = NBTHelper.getModulesList(stack);
         for(INBT inbt : currentListNBT){
-            if(!module.equals(inbt.getString())){
+            if(!module.equals(inbt.getAsString())){
                 newListNBT.add(inbt);
             }
         }

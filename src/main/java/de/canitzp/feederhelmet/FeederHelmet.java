@@ -61,12 +61,13 @@ public class FeederHelmet{
     
     public static final ItemGroup TAB = new ItemGroup(MODID){
         @Override
-        public ItemStack createIcon(){
+        public ItemStack makeIcon(){
             return new ItemStack(FEEDER_HELMET_MODULE_ITEM.get());
         }
-    
+
+        @OnlyIn(Dist.CLIENT)
         @Override
-        public void fill(NonNullList<ItemStack> stacks){
+        public void fillItemList(NonNullList<ItemStack> stacks){
             for(IHelmetModule module : MODULES){
                 stacks.add(new ItemStack(module.getCorrespondingModuleItem()));
                 for(Item item : ForgeRegistries.ITEMS){
@@ -116,8 +117,8 @@ public class FeederHelmet{
                 for(Item helmet : ForgeRegistries.ITEMS.getValues()){
                     if(module.isModuleApplicableTo(helmet)){
                         NonNullList<Ingredient> recipeInputItems = NonNullList.create();
-                        recipeInputItems.add(Ingredient.fromItems(module.getCorrespondingModuleItem()));
-                        recipeInputItems.add(Ingredient.fromItems(helmet));
+                        recipeInputItems.add(Ingredient.of(module.getCorrespondingModuleItem()));
+                        recipeInputItems.add(Ingredient.of(helmet));
                         
                         ItemStack recipeOutputStack = new ItemStack(helmet);
                         
@@ -126,17 +127,17 @@ public class FeederHelmet{
                         ShapelessRecipe recipe = new ShapelessRecipe(craftingId, "", recipeOutputStack, recipeInputItems) {
                             @Nonnull
                             @Override
-                            public ItemStack getCraftingResult(CraftingInventory inv){
+                            public ItemStack assemble(CraftingInventory inv){
                                 CompoundNBT nbt = new CompoundNBT();
-                                for(int i = 0; i < inv.getSizeInventory(); i++){
-                                    ItemStack stack = inv.getStackInSlot(i);
+                                for(int i = 0; i < inv.getContainerSize(); i++){
+                                    ItemStack stack = inv.getItem(i);
                                     if(!stack.isEmpty() && stack.getItem() instanceof ArmorItem){
                                         if(stack.hasTag()){
                                             nbt = stack.getTag();
                                         }
                                     }
                                 }
-                                ItemStack out = super.getCraftingResult(inv);
+                                ItemStack out = super.assemble(inv);
                                 out.setTag(nbt);
                                 NBTHelper.addModule(module.getTagName(), out);
                                 return out;
@@ -146,8 +147,8 @@ public class FeederHelmet{
                             @Override
                             public boolean matches(CraftingInventory inv, World worldIn){
                                 if(super.matches(inv, worldIn)){
-                                    for(int i = 0; i < inv.getSizeInventory(); i++){
-                                        ItemStack stack = inv.getStackInSlot(i);
+                                    for(int i = 0; i < inv.getContainerSize(); i++){
+                                        ItemStack stack = inv.getItem(i);
                                         if(!stack.isEmpty() && stack.getItem() instanceof ArmorItem){
                                             if(NBTHelper.isModulePresent(module.getTagName(), stack)){
                                                 return false;
@@ -158,7 +159,7 @@ public class FeederHelmet{
                                 return super.matches(inv, worldIn);
                             }
                         };
-                        if(recipeManager.getKeys().noneMatch(resourceLocation -> resourceLocation.equals(craftingId))){
+                        if(recipeManager.getRecipeIds().noneMatch(resourceLocation -> resourceLocation.equals(craftingId))){
                             recipesToInject.put(craftingId, recipe);
                         }
                     }
@@ -174,8 +175,8 @@ public class FeederHelmet{
     
     @SubscribeEvent
     public static void updatePlayer(TickEvent.PlayerTickEvent event){
-        if(event.phase == TickEvent.Phase.END && event.player.getEntityWorld().getGameTime() % FeederConfig.GENERAL.WAIT_TICKS.get() == 0){
-            ItemStack helmetStack = event.player.inventory.armorInventory.get(EquipmentSlotType.HEAD.getIndex());
+        if(event.phase == TickEvent.Phase.END && event.player.getCommandSenderWorld().getGameTime() % FeederConfig.GENERAL.WAIT_TICKS.get() == 0){
+            ItemStack helmetStack = event.player.inventory.armor.get(EquipmentSlotType.HEAD.getIndex());
             for(IHelmetModule module : MODULES){
                 if(NBTHelper.isModulePresent(module.getTagName(), helmetStack)){
                     module.updatePlayer(event.player, helmetStack);
@@ -200,9 +201,9 @@ public class FeederHelmet{
     @SubscribeEvent
     public static void playerJoin(PlayerEvent.PlayerLoggedInEvent event){
         PlayerEntity player = event.getPlayer();
-        NonNullList<ItemStack> armorInventory = player.inventory.armorInventory;
-        NonNullList<ItemStack> mainInventory = player.inventory.mainInventory;
-        NonNullList<ItemStack> offHandInventory = player.inventory.offHandInventory;
+        NonNullList<ItemStack> armorInventory = player.inventory.armor;
+        NonNullList<ItemStack> mainInventory = player.inventory.items;
+        NonNullList<ItemStack> offHandInventory = player.inventory.offhand;
         
         NonNullList<ItemStack> mergedInventory = NonNullList.create();
         mergedInventory.addAll(armorInventory);
@@ -226,7 +227,7 @@ public class FeederHelmet{
         return
             (
                 item instanceof ArmorItem
-                    && ((ArmorItem) item).getEquipmentSlot() == EquipmentSlotType.HEAD
+                    && ((ArmorItem) item).getSlot() == EquipmentSlotType.HEAD
                     && !FeederConfig.GENERAL.HELMET_BLACKLIST.get().contains(item.getRegistryName().toString())
             )
                 || FeederConfig.GENERAL.HELMET_WHITELIST.get().contains(item.getRegistryName().toString());
@@ -240,8 +241,8 @@ public class FeederHelmet{
             canWork.set(energy.extractEnergy(energyConsumption, true) == energyConsumption);
         });
         
-        if(!canWork.get() && stack.isDamageable()){
-            int newDmg = stack.getDamage() + FeederConfig.GENERAL.DURABILITY.get();
+        if(!canWork.get() && stack.isDamageableItem()){
+            int newDmg = stack.getDamageValue() + FeederConfig.GENERAL.DURABILITY.get();
             canWork.set(newDmg < stack.getMaxDamage() || FeederConfig.GENERAL.CAN_BREAK.get());
         }
         
