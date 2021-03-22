@@ -195,6 +195,9 @@ public class FeederHelmet{
                                                  helmet.setCount(0);
                                              }
                                              canEat = true;
+                                         } else {
+                                             // for non-damageable helmets
+                                             canEat = true;
                                          }
                                          if(canEat){
                                              ForgeEventFactory.onItemUseStart(event.player, stack, 0);
@@ -237,6 +240,7 @@ public class FeederHelmet{
             int newDmg = stack.getItemDamage() + FeederConfig.DURABILITY;
             return newDmg < stack.getMaxDamage() || FeederConfig.CAN_BREAK_HELMET;
         }
+        // for non-damageable helmets
         return true;
     }
     
