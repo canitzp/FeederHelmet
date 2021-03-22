@@ -55,11 +55,14 @@ public class FeederModule implements IHelmetModule{
                                     canEat.set(true);
                                 }
                             });
-                            if(!hasEnergy.get() && helmetStack.isDamageableItem()){
-                                helmetStack.setDamageValue(helmetStack.getDamageValue() + FeederConfig.GENERAL.DURABILITY.get());
-                                if(helmetStack.getMaxDamage() - helmetStack.getDamageValue() <= 0){
-                                    helmetStack.setCount(0);
+                            if(!hasEnergy.get()){
+                                if(helmetStack.isDamageableItem()){
+                                    helmetStack.setDamageValue(helmetStack.getDamageValue() + FeederConfig.GENERAL.DURABILITY.get());
+                                    if(helmetStack.getMaxDamage() - helmetStack.getDamageValue() <= 0){
+                                        helmetStack.setCount(0);
+                                    }
                                 }
+                                // removed out of damage check if, because there are non-damageable helmets
                                 canEat.set(true);
                             }
                             if(canEat.get()){

@@ -241,9 +241,14 @@ public class FeederHelmet{
             canWork.set(energy.extractEnergy(energyConsumption, true) == energyConsumption);
         });
         
-        if(!canWork.get() && stack.isDamageableItem()){
-            int newDmg = stack.getDamageValue() + FeederConfig.GENERAL.DURABILITY.get();
-            canWork.set(newDmg < stack.getMaxDamage() || FeederConfig.GENERAL.CAN_BREAK.get());
+        if(!canWork.get()){
+            if(stack.isDamageableItem()){
+                int newDmg = stack.getDamageValue() + FeederConfig.GENERAL.DURABILITY.get();
+                canWork.set(newDmg < stack.getMaxDamage() || FeederConfig.GENERAL.CAN_BREAK.get());
+            } else {
+                // There are super-op helmets that aren't damageable, so we need to account for that (eg: Wyvern Armor by Draconic Evolution)
+                canWork.set(true);
+            }
         }
         
         return canWork.get();
