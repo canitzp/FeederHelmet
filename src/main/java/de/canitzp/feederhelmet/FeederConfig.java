@@ -24,6 +24,7 @@ public class FeederConfig {
         public final ForgeConfigSpec.ConfigValue<List<String>> HELMET_WHITELIST;
         public final ForgeConfigSpec.ConfigValue<List<String>> FOOD_BLACKLIST;
         public final ForgeConfigSpec.ConfigValue<List<String>> FOOD_WHITELIST;
+        public final ForgeConfigSpec.ConfigValue<Boolean> FOOD_WHITELIST_ONLY;
     
         public General(ForgeConfigSpec.Builder builder) {
             builder.push("General");
@@ -71,6 +72,11 @@ public class FeederConfig {
                 .translation("Food whitelist")
                 .worldRestart()
                 .define("food_whitelist", new ArrayList<>());
+            FOOD_WHITELIST_ONLY = builder
+                    .comment("Set this to true to ignore all eatable items and only use food listed in the whitelist.")
+                    .translation("Food whitelist only")
+                    .worldRestart()
+                    .define("food_whitelist_only", false);
             builder.pop();
         }
     }

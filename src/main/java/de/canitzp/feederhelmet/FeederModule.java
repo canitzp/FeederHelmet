@@ -3,6 +3,8 @@ package de.canitzp.feederhelmet;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Food;
+import net.minecraft.item.Foods;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
@@ -50,9 +52,12 @@ public class FeederModule implements IHelmetModule{
                             helmetStack.getCapability(CapabilityEnergy.ENERGY).ifPresent(energy -> {
                                 hasEnergy.set(true);
                                 int energyConsumption = FeederConfig.GENERAL.ENERGY_CONSUMPTION.get();
-                                if(energy.extractEnergy(energyConsumption, true) == energyConsumption){
-                                    energy.extractEnergy(energyConsumption, false);
-                                    canEat.set(true);
+                                if (helmetStack.hasTag()) {
+                                    int energy1 = helmetStack.getTag().getInt("Energy");
+                                    if(energy1 >= energyConsumption){
+                                        helmetStack.getTag().putInt("Energy", energy1 - energyConsumption);
+                                        canEat.set(true);
+                                    }
                                 }
                             });
                             if(!hasEnergy.get()){
@@ -76,11 +81,19 @@ public class FeederModule implements IHelmetModule{
             }
         }
     }
-    
+
     private static boolean isStackEatable(@Nonnull ItemStack stack){
-        return !stack.isEmpty()
-            && !FeederConfig.GENERAL.FOOD_BLACKLIST.get().contains(stack.getItem().getRegistryName().toString())
-            && (stack.getItem().isEdible() || FeederConfig.GENERAL.FOOD_WHITELIST.get().contains(stack.getItem().getRegistryName().toString()));
+        if(stack.isEmpty()){
+            return false;
+        }
+        boolean isWhitelisted = FeederConfig.GENERAL.FOOD_WHITELIST.get().contains(stack.getItem().getRegistryName().toString());
+        if(FeederConfig.GENERAL.FOOD_WHITELIST_ONLY.get()){
+            return isWhitelisted;
+        }
+        if(FeederConfig.GENERAL.FOOD_BLACKLIST.get().contains(stack.getItem().getRegistryName().toString())){
+            return false;
+        }
+        return isWhitelisted || stack.getItem().isEdible();
     }
     
     private static boolean canPlayerEat(PlayerEntity player, ItemStack stack){

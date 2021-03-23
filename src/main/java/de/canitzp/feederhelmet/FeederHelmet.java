@@ -236,9 +236,11 @@ public class FeederHelmet{
     public static boolean canDamageBeReducedOrEnergyConsumed(@Nonnull ItemStack stack){
         AtomicBoolean canWork = new AtomicBoolean(false);
         
-        stack.getCapability(CapabilityEnergy.ENERGY).ifPresent(energy -> {
-            int energyConsumption = FeederConfig.GENERAL.ENERGY_CONSUMPTION.get();
-            canWork.set(energy.extractEnergy(energyConsumption, true) == energyConsumption);
+        stack.getCapability(CapabilityEnergy.ENERGY).ifPresent(energyCapability -> {
+            if (stack.hasTag()) {
+                int energy = stack.getTag().getInt("Energy");
+                canWork.set(energy >= FeederConfig.GENERAL.ENERGY_CONSUMPTION.get());
+            }
         });
         
         if(!canWork.get()){

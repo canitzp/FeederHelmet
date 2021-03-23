@@ -1,9 +1,14 @@
+1.10.1:
+    -Energy usage is now working for all helmets, using the "Energy" nbt tag, instead of strictly using the capability extraction - Reported by danail23 with the help of FoxMcloud5655
+    -Added whitelist only config option - Request by zutechugan (Closes #17)
+    -Compatible with 1.16.4 and 1.16.5
+
 1.10.0:
-    - Update to 1.6.4 (Forge 1.16.4-35.1.0), not compatible with older versions.
+    - Update to 1.16.4 (Forge 1.16.4-35.1.0), not compatible with older versions.
     - New config options to overwrite the "eat wait until enough hunger" options, when the player hearts are below or equal 50% (5 Hearts / 10 Damage points)
 
 1.9.0:
-    - Update to 1.6.2 (Forge 1.16.2-33.0.3), not compatible with 1.16.1
+    - Update to 1.16.2 (Forge 1.16.2-33.0.3), not compatible with 1.16.1
 
 1.8.0:
     - Update to 1.16.1 (Forge BETA: 1.16.1-32.0.7), doesn't work with 1.15.x or 1.14.4 anymore :(
@@ -25,6 +30,16 @@
 1.5.0:
     -Update to 1.13
     -New config 'hungry_enough_wait': it waits until no food value is wasted before feeding. default enabled
+
+1.4.3:
+    -Energy usage is now working for all helmets, using the "Energy" nbt tag, instead of strictly using the capability extraction - Reported by danail23 with the help of FoxMcloud5655
+    -Added whitelist only config option - Request by zutechugan (Closes #17)
+
+1.4.2:
+    -Added a creative tab for the module and all possible helmets (same as 1.7.0 for 1.15)
+
+1.4.1:
+    -Adding Item use finish and start event to be more compatible with mods like Nutrition
 
 1.4.0:
     -Feeding now consume the Energy of a helmet if present
