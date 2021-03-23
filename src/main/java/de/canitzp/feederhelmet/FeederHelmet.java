@@ -23,7 +23,6 @@ import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.energy.CapabilityEnergy;
-import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.player.AnvilRepairEvent;
@@ -182,14 +181,15 @@ public class FeederHelmet{
                                      if(event.player.canEat(false)){
                                          boolean canEat = false;
                                          if(helmet.hasCapability(CapabilityEnergy.ENERGY, null)){
-                                             IEnergyStorage energy = helmet.getCapability(CapabilityEnergy.ENERGY, null);
-                                             if(energy != null){
-                                                 if(energy.extractEnergy(FeederConfig.ENERGY_CONSUPTION, true) == FeederConfig.ENERGY_CONSUPTION){
-                                                     energy.extractEnergy(FeederConfig.ENERGY_CONSUPTION, false);
+                                             // use "energy" nbt tag instead of the capability, so receive only energy storages can be used
+                                             if(helmet.hasTagCompound()){
+                                                 int energy = helmet.getTagCompound().getInteger("Energy");
+                                                 if(energy >= FeederConfig.ENERGY_CONSUMPTION){
+                                                     helmet.getTagCompound().setInteger("Energy", energy - FeederConfig.ENERGY_CONSUMPTION);
                                                      canEat = true;
                                                  }
                                              }
-                                         }else if(helmet.isItemStackDamageable()){
+                                         } else if(helmet.isItemStackDamageable()){
                                              helmet.setItemDamage(helmet.getItemDamage() + FeederConfig.DURABILITY);
                                              if(helmet.getMaxDamage() - helmet.getItemDamage() <= 0){
                                                  helmet.setCount(0);
@@ -221,20 +221,26 @@ public class FeederHelmet{
     }
     
     private static boolean isStackEatable(@Nonnull ItemStack stack){
-        return
-            !stack.isEmpty()
-                && !ArrayUtils.contains(FeederConfig.FOOD_BLACKLIST, stack.getItem().getRegistryName().toString())
-                &&
-                (
-                    stack.getItem() instanceof ItemFood
-                        || ArrayUtils.contains(FeederConfig.FOOD_WHITELIST, stack.getItem().getRegistryName().toString())
-                );
+        if(stack.isEmpty()){
+            return false;
+        }
+        boolean isWhitelisted = ArrayUtils.contains(FeederConfig.FOOD_WHITELIST, stack.getItem().getRegistryName().toString());
+        if(FeederConfig.FOOD_ONLY_WHITELIST){
+            return isWhitelisted;
+        }
+        if(ArrayUtils.contains(FeederConfig.FOOD_BLACKLIST, stack.getItem().getRegistryName().toString())){
+            return false;
+        }
+        return isWhitelisted || stack.getItem() instanceof ItemFood;
     }
     
     private static boolean canWork(@Nonnull ItemStack stack){
         if(stack.hasCapability(CapabilityEnergy.ENERGY, null)){
-            IEnergyStorage energy = stack.getCapability(CapabilityEnergy.ENERGY, null);
-            return energy != null && energy.extractEnergy(FeederConfig.ENERGY_CONSUPTION, true) == FeederConfig.ENERGY_CONSUPTION;
+            // use "energy" nbt tag instead of the capability, so receive only energy storages can be used
+            if(stack.hasTagCompound()){
+                int energy = stack.getTagCompound().getInteger("Energy");
+                return energy >= FeederConfig.ENERGY_CONSUMPTION;
+            }
         }
         if(stack.isItemStackDamageable()){
             int newDmg = stack.getItemDamage() + FeederConfig.DURABILITY;

@@ -11,7 +11,7 @@ buildscript {
 apply plugin: 'net.minecraftforge.gradle.forge'
 apply plugin: 'idea'
 
-version = "1.4.2"
+version = "1.4.3"
 group= "de.canitzp.feederhelmet"
 archivesBaseName = "FeederHelmet"
 

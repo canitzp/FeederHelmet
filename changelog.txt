@@ -1,3 +1,7 @@
+1.4.3:
+    -Energy usage is now working for all helmets, using the "Energy" nbt tag, instead of strictly using the capability extraction - Reported by danail23 with the help of FoxMcloud5655
+    -Added whitelist only config option - Request by zutechugan (Closes #17)
+
 1.4.2:
     -Added a creative tab for the module and all possible helmets (same as 1.7.0 for 1.15)
 

@@ -26,7 +26,7 @@ public class FeederConfig {
     @Config.Comment("How much energy should the helmet use for every food eaten, when it is a powered helmet.")
     @Config.Name("Energy necessary")
     @Config.RangeInt(min = 0, max = 5000)
-    public static int ENERGY_CONSUPTION = 10;
+    public static int ENERGY_CONSUMPTION = 10;
 
     @Config.Comment("Can the helmet break while feeding? If this is false, the helmet stops feeding you when durability to low. Only when the helmet isn't powered by Energy.")
     @Config.Name("Can break helmet")
@@ -63,5 +63,9 @@ public class FeederConfig {
     @Config.Comment("All here stated items are additionally to all default items eatable. This can be very dangerous, because it is possible that the helmet doesn't eat it, but uses it!!!")
     @Config.Name("Food whitelist")
     public static String[] FOOD_WHITELIST = new String[0];
+
+    @Config.Comment("Set this to true to ignore all eatable items and only use food listed in the whitelist.")
+    @Config.Name("Food whitelist only")
+    public static boolean FOOD_ONLY_WHITELIST = false;
 
 }
