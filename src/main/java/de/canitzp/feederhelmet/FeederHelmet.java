@@ -133,7 +133,7 @@ public class FeederHelmet{
                                     ItemStack stack = inv.getItem(i);
                                     if(!stack.isEmpty() && stack.getItem() instanceof ArmorItem){
                                         if(stack.hasTag()){
-                                            nbt = stack.getTag();
+                                            nbt = stack.getTag().copy();
                                         }
                                     }
                                 }
@@ -155,8 +155,9 @@ public class FeederHelmet{
                                             }
                                         }
                                     }
+                                    return true;
                                 }
-                                return super.matches(inv, worldIn);
+                                return false;
                             }
                         };
                         if(recipeManager.getRecipeIds().noneMatch(resourceLocation -> resourceLocation.equals(craftingId))){

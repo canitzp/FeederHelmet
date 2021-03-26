@@ -1,3 +1,6 @@
+1.10.2:
+    -Fixed strange crafting behaviour (#20)
+
 1.10.1:
     -Energy usage is now working for all helmets, using the "Energy" nbt tag, instead of strictly using the capability extraction - Reported by danail23 with the help of FoxMcloud5655
     -Added whitelist only config option - Request by zutechugan (Closes #17)
