@@ -71,7 +71,7 @@ public class FeederHelmet{
             for(IHelmetModule module : MODULES){
                 stacks.add(new ItemStack(module.getCorrespondingModuleItem()));
                 for(Item item : ForgeRegistries.ITEMS){
-                    if(module.isModuleApplicableTo(item)){
+                    if(module.isModuleApplicableTo(item.getDefaultInstance())){
                         ItemStack stack = new ItemStack(item);
                         CompoundNBT tag = new CompoundNBT();
                         ListNBT modulesList = new ListNBT();
@@ -115,7 +115,7 @@ public class FeederHelmet{
             Map<ResourceLocation, IRecipe<?>> recipesToInject = new HashMap<>();
             for(IHelmetModule module : MODULES){
                 for(Item helmet : ForgeRegistries.ITEMS.getValues()){
-                    if(module.isModuleApplicableTo(helmet)){
+                    if(module.isModuleApplicableTo(helmet.getDefaultInstance())){
                         NonNullList<Ingredient> recipeInputItems = NonNullList.create();
                         recipeInputItems.add(Ingredient.of(module.getCorrespondingModuleItem()));
                         recipeInputItems.add(Ingredient.of(helmet));
@@ -224,14 +224,8 @@ public class FeederHelmet{
         }
     }
     
-    public static boolean isItemHelmet(Item item){
-        return
-            (
-                item instanceof ArmorItem
-                    && ((ArmorItem) item).getSlot() == EquipmentSlotType.HEAD
-                    && !FeederConfig.GENERAL.HELMET_BLACKLIST.get().contains(item.getRegistryName().toString())
-            )
-                || FeederConfig.GENERAL.HELMET_WHITELIST.get().contains(item.getRegistryName().toString());
+    public static boolean isItemHelmet(ItemStack stack){
+        return (stack.getItem() instanceof ArmorItem && ((ArmorItem) stack.getItem()).getSlot() == EquipmentSlotType.HEAD && !ItemStackUtil.isHelmetBlacklisted(stack)) || ItemStackUtil.isHelmetWhitelisted(stack);
     }
     
     public static boolean canDamageBeReducedOrEnergyConsumed(@Nonnull ItemStack stack){

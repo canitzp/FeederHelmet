@@ -17,8 +17,8 @@ public class ItemPhotosynthesisModule extends Item {
     }
     
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable World world, List<ITextComponent> tooltip, ITooltipFlag flag) {
-        super.appendHoverText(stack, world, tooltip, flag);
-        tooltip.add(new TranslationTextComponent("item.feederhelmet:photosynthesis_helmet_module.desc").setStyle(Style.EMPTY.withColor(Color.fromLegacyFormat(TextFormatting.GRAY))));
+    public void appendHoverText(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
+        super.appendHoverText(stack, worldIn, tooltip, flagIn);
+        tooltip.add(new TranslationTextComponent("item.feederhelmet:photosynthesis_helmet_module.desc").setStyle(Style.EMPTY.applyFormats(TextFormatting.GRAY)));
     }
 }

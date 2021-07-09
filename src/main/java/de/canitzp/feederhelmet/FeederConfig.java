@@ -1,5 +1,6 @@
 package de.canitzp.feederhelmet;
 
+import com.google.common.collect.Lists;
 import net.minecraftforge.common.ForgeConfigSpec;
 
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ public class FeederConfig {
         public final ForgeConfigSpec.ConfigValue<Boolean> CAN_BREAK;
         public final ForgeConfigSpec.ConfigValue<Boolean> WAIT_UNITL_FILL_ALL_HUNGER;
         public final ForgeConfigSpec.ConfigValue<Boolean> IGNORE_WAITING_WHEN_LOW_HEART;
+        public final ForgeConfigSpec.ConfigValue<Boolean> BLACKLIST_SMELTABLES;
         public final ForgeConfigSpec.ConfigValue<List<String>> HELMET_BLACKLIST;
         public final ForgeConfigSpec.ConfigValue<List<String>> HELMET_WHITELIST;
         public final ForgeConfigSpec.ConfigValue<List<String>> FOOD_BLACKLIST;
@@ -52,6 +54,10 @@ public class FeederConfig {
                 .comment("Should the 'hungry_enough_wait' option be ignored when the player is low on hearts? (less or equal 50%)")
                 .translation("Ignore hunger wait when on low hearts")
                 .define("ignore_hungry_enough_wait_when_heart_low", true);
+            BLACKLIST_SMELTABLES = builder
+                .comment("If enabled all eatable items, that also can be smelted are blacklisted.")
+                .translation("Blacklist smeltable foods")
+                .define("blacklist_smeltables", false);
             HELMET_BLACKLIST = builder
                 .comment("The here stated items can't be used as FeederHelmet")
                 .translation("Helmet blacklist")
@@ -66,7 +72,7 @@ public class FeederConfig {
                 .comment("All here stated items aren't consumable by the FeederHelmet")
                 .translation("Food blacklist")
                 .worldRestart()
-                .define("food_blacklist", new ArrayList<>());
+                .define("food_blacklist", Lists.newArrayList("minecraft:rotten_flesh", "minecraft:spider_eye", "minecraft:porkchop", "minecraft:beef", "minecraft:mutton", "minecraft:salmon", "minecraft:chicken", "minecraft:rabbit", "minecraft:potato", "minecraft:chorus_fruit", "minecraft:pufferfish", "minecraft:poisonous_potato"));
             FOOD_WHITELIST = builder
                 .comment("All here stated items are additionally to all default items eatable. This can be very dangerous, because it is possible that the helmet doesn't eat it, but uses it!!!")
                 .translation("Food whitelist")

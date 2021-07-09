@@ -5,7 +5,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.registries.IForgeRegistry;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -19,7 +18,7 @@ public interface IHelmetModule {
     String getTagName();
     
     // can this module be applied to the given helmet
-    boolean isModuleApplicableTo(Item item);
+    boolean isModuleApplicableTo(ItemStack stack);
     
     // additional information to render to the item stack tooltip. Only called when the module is applied to the item stack
     void renderTooltip(@Nonnull ItemStack stack, @Nullable PlayerEntity entityPlayer, List<ITextComponent> list, ITooltipFlag flags);

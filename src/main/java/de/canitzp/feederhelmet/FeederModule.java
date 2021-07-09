@@ -1,6 +1,5 @@
 package de.canitzp.feederhelmet;
 
-import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Food;
@@ -8,8 +7,9 @@ import net.minecraft.item.Foods;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.World;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.event.ForgeEventFactory;
 
@@ -31,20 +31,20 @@ public class FeederModule implements IHelmetModule{
     }
     
     @Override
-    public boolean isModuleApplicableTo(Item item){
-        return FeederHelmet.isItemHelmet(item);
+    public boolean isModuleApplicableTo(ItemStack stack){
+        return FeederHelmet.isItemHelmet(stack);
     }
     
     @Override
     public void renderTooltip(@Nonnull ItemStack stack, @Nullable PlayerEntity entityPlayer, List<ITextComponent> list, ITooltipFlag flags){
-        list.add(new StringTextComponent(TextFormatting.YELLOW.toString() + TextFormatting.ITALIC.toString() + I18n.get("item.feederhelmet:feeder_helmet_module_installed.text") + TextFormatting.RESET.toString()));
+        list.add(new TranslationTextComponent("item.feederhelmet:feeder_helmet_module_installed.text").withStyle(TextFormatting.YELLOW, TextFormatting.ITALIC));
     }
     
     @Override
     public void updatePlayer(PlayerEntity player, ItemStack helmetStack){
         if(player.canEat(false) && FeederHelmet.canDamageBeReducedOrEnergyConsumed(helmetStack)){
             for(ItemStack inventoryStack : player.inventory.items){
-                if(FeederModule.isStackEatable(inventoryStack)){
+                if(FeederModule.canHelmetEatStack(player.level, inventoryStack)){
                     if(FeederModule.canPlayerEat(player, inventoryStack)){
                         if(player.canEat(false)){
                             AtomicBoolean hasEnergy = new AtomicBoolean(false);
@@ -81,19 +81,23 @@ public class FeederModule implements IHelmetModule{
             }
         }
     }
-
-    private static boolean isStackEatable(@Nonnull ItemStack stack){
+    
+    private static boolean canHelmetEatStack(World level, @Nonnull ItemStack stack){
         if(stack.isEmpty()){
             return false;
         }
-        boolean isWhitelisted = FeederConfig.GENERAL.FOOD_WHITELIST.get().contains(stack.getItem().getRegistryName().toString());
-        if(FeederConfig.GENERAL.FOOD_WHITELIST_ONLY.get()){
-            return isWhitelisted;
-        }
-        if(FeederConfig.GENERAL.FOOD_BLACKLIST.get().contains(stack.getItem().getRegistryName().toString())){
+        if(ItemStackUtil.isFoodBlacklisted(stack)){
             return false;
         }
-        return isWhitelisted || stack.getItem().isEdible();
+        if(ItemStackUtil.isFoodWhitelisted(stack)){
+            return true;
+        }
+        if(FeederConfig.GENERAL.BLACKLIST_SMELTABLES.get()){
+            if(ItemStackUtil.isSmeltable(level, stack)){
+                return false;
+            }
+        }
+        return ItemStackUtil.isEatable(stack);
     }
     
     private static boolean canPlayerEat(PlayerEntity player, ItemStack stack){

@@ -1,3 +1,8 @@
+1.11.0:
+    - Update to 1.16.5 (Forge 1.16.5-36.1.0), not compatible with older versions.
+    - New config option to disable smeltable foods to be eaten. This prevents eating raw food, but if some mod adds an smelting recipe for cocked food, it can also not be eaten anymore. This is why it is disabled by default. (#24)
+    - Added defaults to the food_blacklist, like raw or poisonous food. (#22)
+
 1.10.2:
     -Fixed strange crafting behaviour (#20)
 

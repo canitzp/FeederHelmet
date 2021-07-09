@@ -1,0 +1,6 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "feederhelmet:items/photosynthesis_helmet_module"
+  }
+}
