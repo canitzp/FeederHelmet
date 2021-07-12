@@ -3,28 +3,25 @@ package de.canitzp.feederhelmet;
 import com.google.common.collect.ImmutableMap;
 import de.canitzp.feederhelmet.item.ItemFeederModule;
 import de.canitzp.feederhelmet.item.ItemPhotosynthesisModule;
-import mezz.jei.events.PlayerJoinedWorldEvent;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.*;
-import net.minecraft.item.crafting.*;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.StringNBT;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.World;
+import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.*;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.energy.CapabilityEnergy;
-import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.AnvilRepairEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
@@ -59,7 +56,7 @@ public class FeederHelmet{
     
     public static final List<IHelmetModule> MODULES = new ArrayList<>();
     
-    public static final ItemGroup TAB = new ItemGroup(MODID){
+    public static final CreativeModeTab TAB = new CreativeModeTab(MODID){
         @Override
         public ItemStack makeIcon(){
             return new ItemStack(FEEDER_HELMET_MODULE_ITEM.get());
@@ -73,9 +70,9 @@ public class FeederHelmet{
                 for(Item item : ForgeRegistries.ITEMS){
                     if(module.isModuleApplicableTo(item.getDefaultInstance())){
                         ItemStack stack = new ItemStack(item);
-                        CompoundNBT tag = new CompoundNBT();
-                        ListNBT modulesList = new ListNBT();
-                        modulesList.add(StringNBT.valueOf(module.getTagName()));
+                        CompoundTag tag = new CompoundTag();
+                        ListTag modulesList = new ListTag();
+                        modulesList.add(StringTag.valueOf(module.getTagName()));
                         tag.put("modules", modulesList);
                         stack.setTag(tag);
                         stacks.add(stack);
@@ -107,12 +104,12 @@ public class FeederHelmet{
     
     @SubscribeEvent
     public static void onWorldLoad(WorldEvent.Load event){
-        IWorld iWorld = event.getWorld();
-        if(iWorld instanceof World){
-            World world = (World) iWorld;
+        LevelAccessor iWorld = event.getWorld();
+        if(iWorld instanceof Level){
+            Level world = (Level) iWorld;
             RecipeManager recipeManager = world.getRecipeManager();
             
-            Map<ResourceLocation, IRecipe<?>> recipesToInject = new HashMap<>();
+            Map<ResourceLocation, Recipe<?>> recipesToInject = new HashMap<>();
             for(IHelmetModule module : MODULES){
                 for(Item helmet : ForgeRegistries.ITEMS.getValues()){
                     if(module.isModuleApplicableTo(helmet.getDefaultInstance())){
@@ -127,8 +124,8 @@ public class FeederHelmet{
                         ShapelessRecipe recipe = new ShapelessRecipe(craftingId, "", recipeOutputStack, recipeInputItems) {
                             @Nonnull
                             @Override
-                            public ItemStack assemble(CraftingInventory inv){
-                                CompoundNBT nbt = new CompoundNBT();
+                            public ItemStack assemble(CraftingContainer inv){
+                                CompoundTag nbt = new CompoundTag();
                                 for(int i = 0; i < inv.getContainerSize(); i++){
                                     ItemStack stack = inv.getItem(i);
                                     if(!stack.isEmpty() && stack.getItem() instanceof ArmorItem){
@@ -145,7 +142,7 @@ public class FeederHelmet{
                             
                             // checks if the helmet doesn't already have the module
                             @Override
-                            public boolean matches(CraftingInventory inv, World worldIn){
+                            public boolean matches(CraftingContainer inv, Level worldIn){
                                 if(super.matches(inv, worldIn)){
                                     for(int i = 0; i < inv.getContainerSize(); i++){
                                         ItemStack stack = inv.getItem(i);
@@ -166,10 +163,10 @@ public class FeederHelmet{
                     }
                 }
             }
-            Map<IRecipeType<?>, Map<ResourceLocation, IRecipe<?>>> map = new HashMap<>(recipeManager.recipes);
-            Map<ResourceLocation, IRecipe<?>> craftingRecipes = new HashMap<>(map.getOrDefault(IRecipeType.CRAFTING, Collections.emptyMap()));
+            Map<RecipeType<?>, Map<ResourceLocation, Recipe<?>>> map = new HashMap<>(recipeManager.recipes);
+            Map<ResourceLocation, Recipe<?>> craftingRecipes = new HashMap<>(map.getOrDefault(RecipeType.CRAFTING, Collections.emptyMap()));
             craftingRecipes.putAll(recipesToInject);
-            map.put(IRecipeType.CRAFTING, ImmutableMap.copyOf(craftingRecipes));
+            map.put(RecipeType.CRAFTING, ImmutableMap.copyOf(craftingRecipes));
             recipeManager.recipes = ImmutableMap.copyOf(map);
         }
     }
@@ -177,7 +174,7 @@ public class FeederHelmet{
     @SubscribeEvent
     public static void updatePlayer(TickEvent.PlayerTickEvent event){
         if(event.phase == TickEvent.Phase.END && event.player.getCommandSenderWorld().getGameTime() % FeederConfig.GENERAL.WAIT_TICKS.get() == 0){
-            ItemStack helmetStack = event.player.inventory.armor.get(EquipmentSlotType.HEAD.getIndex());
+            ItemStack helmetStack = event.player.inventory.armor.get(EquipmentSlot.HEAD.getIndex());
             for(IHelmetModule module : MODULES){
                 if(NBTHelper.isModulePresent(module.getTagName(), helmetStack)){
                     module.updatePlayer(event.player, helmetStack);
@@ -193,7 +190,7 @@ public class FeederHelmet{
         ItemStack result = event.getItemResult();
         
         if(toRepair.hasTag() && toRepair.getTag().contains("modules", Constants.NBT.TAG_LIST)){
-            CompoundNBT nbt = result.hasTag() ? result.getTag() : new CompoundNBT();
+            CompoundTag nbt = result.hasTag() ? result.getTag() : new CompoundTag();
             nbt.put("modules", toRepair.getTag().get("modules"));
             result.setTag(nbt);
         }
@@ -201,7 +198,7 @@ public class FeederHelmet{
     
     @SubscribeEvent
     public static void playerJoin(PlayerEvent.PlayerLoggedInEvent event){
-        PlayerEntity player = event.getPlayer();
+        Player player = event.getPlayer();
         NonNullList<ItemStack> armorInventory = player.inventory.armor;
         NonNullList<ItemStack> mainInventory = player.inventory.items;
         NonNullList<ItemStack> offHandInventory = player.inventory.offhand;
@@ -213,11 +210,11 @@ public class FeederHelmet{
     
         for(ItemStack stack : mergedInventory){
             if(stack.hasTag()){
-                CompoundNBT tag = stack.getTag();
+                CompoundTag tag = stack.getTag();
                 if(tag.contains("AutoFeederHelmet", Constants.NBT.TAG_BYTE)){
                     tag.remove("AutoFeederHelmet");
-                    ListNBT modules = tag.getList("modules", Constants.NBT.TAG_STRING);
-                    modules.add(StringNBT.valueOf("feeder_module"));
+                    ListTag modules = tag.getList("modules", Constants.NBT.TAG_STRING);
+                    modules.add(StringTag.valueOf("feeder_module"));
                     tag.put("modules", modules);
                 }
             }
@@ -225,7 +222,7 @@ public class FeederHelmet{
     }
     
     public static boolean isItemHelmet(ItemStack stack){
-        return (stack.getItem() instanceof ArmorItem && ((ArmorItem) stack.getItem()).getSlot() == EquipmentSlotType.HEAD && !ItemStackUtil.isHelmetBlacklisted(stack)) || ItemStackUtil.isHelmetWhitelisted(stack);
+        return (stack.getItem() instanceof ArmorItem && ((ArmorItem) stack.getItem()).getSlot() == EquipmentSlot.HEAD && !ItemStackUtil.isHelmetBlacklisted(stack)) || ItemStackUtil.isHelmetWhitelisted(stack);
     }
     
     public static boolean canDamageBeReducedOrEnergyConsumed(@Nonnull ItemStack stack){

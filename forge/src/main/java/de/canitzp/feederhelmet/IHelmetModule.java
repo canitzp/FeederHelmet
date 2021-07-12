@@ -1,10 +1,10 @@
 package de.canitzp.feederhelmet;
 
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -21,8 +21,8 @@ public interface IHelmetModule {
     boolean isModuleApplicableTo(ItemStack stack);
     
     // additional information to render to the item stack tooltip. Only called when the module is applied to the item stack
-    void renderTooltip(@Nonnull ItemStack stack, @Nullable PlayerEntity entityPlayer, List<ITextComponent> list, ITooltipFlag flags);
+    void renderTooltip(@Nonnull ItemStack stack, @Nullable Player entityPlayer, List<Component> list, TooltipFlag flags);
     
-    void updatePlayer(PlayerEntity player, ItemStack helmet);
+    void updatePlayer(Player player, ItemStack helmet);
     
 }
