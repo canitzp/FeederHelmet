@@ -6,8 +6,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.List;
 
 public interface IHelmetModule {
@@ -21,7 +19,7 @@ public interface IHelmetModule {
     boolean isModuleApplicableTo(ItemStack stack);
     
     // additional information to render to the item stack tooltip. Only called when the module is applied to the item stack
-    void renderTooltip(@Nonnull ItemStack stack, @Nullable Player entityPlayer, List<Component> list, TooltipFlag flags);
+    void renderTooltip(ItemStack stack, Player entityPlayer, List<Component> list, TooltipFlag flags);
     
     void updatePlayer(Player player, ItemStack helmet);
     

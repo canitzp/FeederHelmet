@@ -1,0 +1,13 @@
+[general]
+
+# How much durability should the helmet use for every food eaten.
+# Only for unpowered helmets.
+# Range: 0-64
+# Default: 1
+durability = 1
+
+# How much energy should the helmet use for every food eaten, when it is a powered helmet.
+# Unit: FE per tick
+# Range: 0-5000
+# Default: 10
+energy_consumption = 10
