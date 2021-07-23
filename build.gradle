@@ -1,26 +1,28 @@
 buildscript {
     repositories {
-        maven { url = "http://files.minecraftforge.net/maven" }
+        // These repositories are only for Gradle plugins, put any other repositories in the repository block further below
+        maven { url = 'https://maven.minecraftforge.net' }
         mavenCentral()
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '4.1.+', changing: true
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
     }
 }
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'maven-publish'
 apply plugin: 'idea'
 
-version = "1.11.0"
+version = "1.12.0"
 group= "de.canitzp.feederhelmet"
 archivesBaseName = "FeederHelmet"
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(8)
+// Mojang ships Java 16 to end users in 1.17+ instead of Java 8 in 1.16 or lower, so your mod should target Java 16.
+java.toolchain.languageVersion = JavaLanguageVersion.of(16)
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 
 minecraft {
-    mappings channel: 'official', version: '1.16.5'
+    mappings channel: 'official', version: '1.17.1'
 
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
@@ -99,14 +101,14 @@ minecraft {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
-    maven {
+    /*maven {
         url = "https://dvs1.progwml6.com/files/maven"
-    }
+    }*/
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.16.5-36.1.0'
-    implementation fg.deobf("mezz.jei:jei-${project.jei_version}")
+    minecraft 'net.minecraftforge:forge:1.17.1-37.0.1'
+    //implementation fg.deobf("mezz.jei:jei-${project.jei_version}")
 }
 
 jar {

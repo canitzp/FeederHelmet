@@ -1,8 +1,8 @@
 package de.canitzp.feederhelmet;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipeType;
-import net.minecraft.world.World;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.level.Level;
 
 public class ItemStackUtil {
 
@@ -18,8 +18,8 @@ public class ItemStackUtil {
         return FeederConfig.GENERAL.FOOD_WHITELIST.get().contains(ItemStackUtil.getItemStackResourceLocationString(stack));
     }
     
-    public static boolean isSmeltable(World level, ItemStack stack){
-        return level.getRecipeManager().getAllRecipesFor(IRecipeType.SMELTING).stream().anyMatch(furnaceRecipe -> furnaceRecipe.getIngredients().stream().anyMatch(ingredient -> ingredient.test(stack)));
+    public static boolean isSmeltable(Level level, ItemStack stack){
+        return level.getRecipeManager().getAllRecipesFor(RecipeType.SMELTING).stream().anyMatch(furnaceRecipe -> furnaceRecipe.getIngredients().stream().anyMatch(ingredient -> ingredient.test(stack)));
     }
     
     public static boolean isEatable(ItemStack stack){

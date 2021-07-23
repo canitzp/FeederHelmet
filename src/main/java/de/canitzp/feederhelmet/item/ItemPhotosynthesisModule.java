@@ -1,11 +1,14 @@
 package de.canitzp.feederhelmet.item;
 
 import de.canitzp.feederhelmet.FeederHelmet;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.*;
-import net.minecraft.world.World;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -17,8 +20,8 @@ public class ItemPhotosynthesisModule extends Item {
     }
     
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
+    public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
         super.appendHoverText(stack, worldIn, tooltip, flagIn);
-        tooltip.add(new TranslationTextComponent("item.feederhelmet:photosynthesis_helmet_module.desc").setStyle(Style.EMPTY.applyFormats(TextFormatting.GRAY)));
+        tooltip.add(new TranslatableComponent("item.feederhelmet:photosynthesis_helmet_module.desc").setStyle(Style.EMPTY.applyFormats(ChatFormatting.GRAY)));
     }
 }
