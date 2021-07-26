@@ -11,3 +11,18 @@ durability = 1
 # Range: 0-5000
 # Default: 10
 energy_consumption = 10
+
+# Can the helmet break while feeding?
+# If this is false, the helmet stops feeding you when durability to low.
+# Only when the helmet isn't powered by Energy.
+# Default: false
+can_break = false
+
+# Defines how much ticks are between food checks.
+# 20 ticks = 1 second
+# Default: 20
+wait_ticks = 20
+
+# Should the helmet wait until the food can be eaten completely, without any hunger loss by early eating?
+# Default: true
+prevent_food_hunger_loss = true
