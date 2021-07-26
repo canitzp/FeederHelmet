@@ -18,6 +18,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.Constants;
@@ -104,12 +105,14 @@ public class FeederHelmet{
 
     @SubscribeEvent
     public static void onWorldLoad(WorldEvent.Load event){
-        LevelAccessor iWorld = event.getWorld();
-        if(iWorld instanceof Level){
-            Level world = (Level) iWorld;
-            RecipeManager recipeManager = world.getRecipeManager();
+        LevelAccessor levelAccessor = event.getWorld();
+        if(levelAccessor instanceof Level level){
+            if(level.dimension() != Level.OVERWORLD){
+                return;
+            }
+            RecipeManager recipeManager = level.getRecipeManager();
 
-            Map<ResourceLocation, Recipe<?>> recipesToInject = new HashMap<>();
+            List<Recipe<?>> moduleRecipes = new ArrayList<>();
             for(IHelmetModule module : MODULES){
                 for(Item helmet : ForgeRegistries.ITEMS.getValues()){
                     if(module.isModuleApplicableTo(helmet.getDefaultInstance())){
@@ -142,8 +145,8 @@ public class FeederHelmet{
 
                             // checks if the helmet doesn't already have the module
                             @Override
-                            public boolean matches(CraftingContainer inv, Level worldIn){
-                                if(super.matches(inv, worldIn)){
+                            public boolean matches(CraftingContainer inv, Level level1){
+                                if(super.matches(inv, level1)){
                                     for(int i = 0; i < inv.getContainerSize(); i++){
                                         ItemStack stack = inv.getItem(i);
                                         if(!stack.isEmpty() && stack.getItem() instanceof ArmorItem){
@@ -157,17 +160,16 @@ public class FeederHelmet{
                                 return false;
                             }
                         };
+                        
                         if(recipeManager.getRecipeIds().noneMatch(resourceLocation -> resourceLocation.equals(craftingId))){
-                            recipesToInject.put(craftingId, recipe);
+                            moduleRecipes.add(recipe);
+                            System.out.printf("Registering recipes for module: '%s'; recipe id: '%s'%n", module.getTagName(), craftingId);
                         }
                     }
                 }
             }
-            Map<RecipeType<?>, Map<ResourceLocation, Recipe<?>>> map = new HashMap<>(recipeManager.recipes);
-            Map<ResourceLocation, Recipe<?>> craftingRecipes = new HashMap<>(map.getOrDefault(RecipeType.CRAFTING, Collections.emptyMap()));
-            craftingRecipes.putAll(recipesToInject);
-            map.put(RecipeType.CRAFTING, ImmutableMap.copyOf(craftingRecipes));
-            recipeManager.recipes = ImmutableMap.copyOf(map);
+            
+            recipeManager.replaceRecipes(moduleRecipes);
         }
     }
     

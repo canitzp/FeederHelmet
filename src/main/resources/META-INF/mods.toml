@@ -45,6 +45,6 @@ description='''AutoFeederHelmet adds the ability to helmets to feed you whenever
 [[dependencies.feederhelmet]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.17.+]"
+    versionRange="[1.17.1,]"
     ordering="NONE"
     side="BOTH"
