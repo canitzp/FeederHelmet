@@ -1,3 +1,6 @@
+1.12.1:
+    - Fixed crash on world join, when a large modpack is used, where helmet names have duplicates (eg: obsidian_helmet), now the recipe registry also includes the modid.
+
 1.12.0:
     - Update to 1.17.1 (Forge 1.17.1-37.0.9), not compatible with 1.16.5
     - New way of registering recipes, without the access transformer. This may fix some registering issues.

@@ -122,7 +122,7 @@ public class FeederHelmet{
 
                         ItemStack recipeOutputStack = new ItemStack(helmet);
 
-                        ResourceLocation craftingId = new ResourceLocation(MODID, module.getTagName() + "_" + helmet.getRegistryName().getPath());
+                        ResourceLocation craftingId = new ResourceLocation(MODID, module.getTagName() + "_" + helmet.getRegistryName().getNamespace() + "_" + helmet.getRegistryName().getPath());
 
                         ShapelessRecipe recipe = new ShapelessRecipe(craftingId, "", recipeOutputStack, recipeInputItems) {
                             @Nonnull
@@ -169,7 +169,12 @@ public class FeederHelmet{
                 }
             }
             
-            recipeManager.replaceRecipes(moduleRecipes);
+            try{
+                recipeManager.replaceRecipes(moduleRecipes);
+            } catch(IllegalStateException e){
+                System.err.println("Illegal recipe replacement catched!");
+                e.printStackTrace();
+            }
         }
     }
     
