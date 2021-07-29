@@ -1,3 +1,6 @@
+1.12.2:
+    - Fixed recipe injection again D:. It should work properly now, I have tested it together with SolarHelmet
+
 1.12.1:
     - Fixed crash on world join, when a large modpack is used, where helmet names have duplicates (eg: obsidian_helmet), now the recipe registry also includes the modid.
 

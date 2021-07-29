@@ -37,6 +37,8 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fmllegacy.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nonnull;
 import java.util.*;
@@ -50,6 +52,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class FeederHelmet{
     
     public static final String MODID = "feederhelmet";
+    
+    private static final Logger LOGGER = LogManager.getLogger(FeederHelmet.MODID);
     
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
     public static final RegistryObject<ItemFeederModule> FEEDER_HELMET_MODULE_ITEM = ITEMS.register("feeder_helmet_module", ItemFeederModule::new);
@@ -84,11 +88,13 @@ public class FeederHelmet{
     };
     
     public FeederHelmet(){
+        LOGGER.info("Feeder Helmet loading...");
         MODULES.add(new FeederModule());
         
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, FeederConfig.spec);
         
         ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
+        LOGGER.info("Feeder Helmet loaded.");
     }
     
     @OnlyIn(Dist.CLIENT)
@@ -110,9 +116,11 @@ public class FeederHelmet{
             if(level.dimension() != Level.OVERWORLD){
                 return;
             }
+            LOGGER.info("Feeder Helmet recipe injecting...");
             RecipeManager recipeManager = level.getRecipeManager();
-
-            List<Recipe<?>> moduleRecipes = new ArrayList<>();
+    
+            // list which the old recipes are replaced with. This should include all existing recipes and the new ones, before recipeManager#replaceRecipes is called!
+            List<Recipe<?>> allNewRecipes = new ArrayList<>();
             for(IHelmetModule module : MODULES){
                 for(Item helmet : ForgeRegistries.ITEMS.getValues()){
                     if(module.isModuleApplicableTo(helmet.getDefaultInstance())){
@@ -162,18 +170,19 @@ public class FeederHelmet{
                         };
                         
                         if(recipeManager.getRecipeIds().noneMatch(resourceLocation -> resourceLocation.equals(craftingId))){
-                            moduleRecipes.add(recipe);
-                            System.out.printf("Registering recipes for module: '%s'; recipe id: '%s'%n", module.getTagName(), craftingId);
+                            allNewRecipes.add(recipe);
+                            LOGGER.info(String.format("Feeder Helmet created %s recipe for %s with id '%s'", module.getTagName(), helmet.getRegistryName().toString(), craftingId));
                         }
                     }
                 }
             }
             
             try{
-                recipeManager.replaceRecipes(moduleRecipes);
+                // add all existing recipes, since we're gonna replace them
+                allNewRecipes.addAll(recipeManager.getRecipes());
+                recipeManager.replaceRecipes(allNewRecipes);
             } catch(IllegalStateException e){
-                System.err.println("Illegal recipe replacement catched!");
-                e.printStackTrace();
+                LOGGER.error("Feeder Helmet: Illegal recipe replacement caught! Report this to author immediately!", e);
             }
         }
     }
