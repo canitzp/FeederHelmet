@@ -1,3 +1,10 @@
+1.11.1:
+    - Update Forge to 1.16.5-36.2.0
+    - New way of registering recipes, without the access transformer. This may fix some registering issues. (Same as FeederHelmet-1.12.2)
+    - Fixed crash on world join, when a large modpack is used, where helmet names have duplicates (eg: obsidian_helmet), now the recipe registry also includes the modid. (Same as FeederHelmet-1.12.1)
+    - Fixed config option 'can_break' not working at all
+    - Fixed recipe creation on client side
+
 1.11.0:
     - Update to 1.16.5 (Forge 1.16.5-36.1.0), not compatible with older versions.
     - New config option to disable smeltable foods to be eaten. This prevents eating raw food, but if some mod adds an smelting recipe for cocked food, it can also not be eaten anymore. This is why it is disabled by default. (#24)

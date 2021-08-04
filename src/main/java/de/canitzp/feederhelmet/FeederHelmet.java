@@ -1,30 +1,29 @@
 package de.canitzp.feederhelmet;
 
-import com.google.common.collect.ImmutableMap;
 import de.canitzp.feederhelmet.item.ItemFeederModule;
 import de.canitzp.feederhelmet.item.ItemPhotosynthesisModule;
-import mezz.jei.events.PlayerJoinedWorldEvent;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.*;
-import net.minecraft.item.crafting.*;
+import net.minecraft.item.ArmorItem;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.item.crafting.Ingredient;
+import net.minecraft.item.crafting.RecipeManager;
+import net.minecraft.item.crafting.ShapelessRecipe;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.StringNBT;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.energy.CapabilityEnergy;
-import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.AnvilRepairEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
@@ -39,9 +38,12 @@ import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nonnull;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -52,6 +54,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class FeederHelmet{
     
     public static final String MODID = "feederhelmet";
+    
+    private static final Logger LOGGER = LogManager.getLogger(FeederHelmet.MODID);
     
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
     public static final RegistryObject<ItemFeederModule> FEEDER_HELMET_MODULE_ITEM = ITEMS.register("feeder_helmet_module", ItemFeederModule::new);
@@ -86,11 +90,13 @@ public class FeederHelmet{
     };
     
     public FeederHelmet(){
+        LOGGER.info("Feeder Helmet loading...");
         MODULES.add(new FeederModule());
         
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, FeederConfig.spec);
         
         ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
+        LOGGER.info("Feeder Helmet loaded.");
     }
     
     @OnlyIn(Dist.CLIENT)
@@ -107,23 +113,31 @@ public class FeederHelmet{
     
     @SubscribeEvent
     public static void onWorldLoad(WorldEvent.Load event){
-        IWorld iWorld = event.getWorld();
-        if(iWorld instanceof World){
-            World world = (World) iWorld;
-            RecipeManager recipeManager = world.getRecipeManager();
-            
-            Map<ResourceLocation, IRecipe<?>> recipesToInject = new HashMap<>();
+        IWorld levelAccessor = event.getWorld();
+        if(levelAccessor.isClientSide()){
+            return;
+        }
+        if(levelAccessor instanceof World){
+            World level = (World) levelAccessor;
+            if(level.dimension() != World.OVERWORLD){
+                return;
+            }
+            LOGGER.info("Feeder Helmet recipe injecting...");
+            RecipeManager recipeManager = level.getRecipeManager();
+    
+            // list which the old recipes are replaced with. This should include all existing recipes and the new ones, before recipeManager#replaceRecipes is called!
+            List<IRecipe<?>> allNewRecipes = new ArrayList<>();
             for(IHelmetModule module : MODULES){
                 for(Item helmet : ForgeRegistries.ITEMS.getValues()){
                     if(module.isModuleApplicableTo(helmet.getDefaultInstance())){
                         NonNullList<Ingredient> recipeInputItems = NonNullList.create();
                         recipeInputItems.add(Ingredient.of(module.getCorrespondingModuleItem()));
                         recipeInputItems.add(Ingredient.of(helmet));
-                        
+
                         ItemStack recipeOutputStack = new ItemStack(helmet);
-                        
-                        ResourceLocation craftingId = new ResourceLocation(MODID, module.getTagName() + "_" + helmet.getRegistryName().getPath());
-                        
+
+                        ResourceLocation craftingId = new ResourceLocation(MODID, module.getTagName() + "_" + helmet.getRegistryName().getNamespace() + "_" + helmet.getRegistryName().getPath());
+
                         ShapelessRecipe recipe = new ShapelessRecipe(craftingId, "", recipeOutputStack, recipeInputItems) {
                             @Nonnull
                             @Override
@@ -160,23 +174,28 @@ public class FeederHelmet{
                                 return false;
                             }
                         };
+                        
                         if(recipeManager.getRecipeIds().noneMatch(resourceLocation -> resourceLocation.equals(craftingId))){
-                            recipesToInject.put(craftingId, recipe);
+                            allNewRecipes.add(recipe);
+                            LOGGER.info(String.format("Feeder Helmet created %s recipe for %s with id '%s'", module.getTagName(), helmet.getRegistryName().toString(), craftingId));
                         }
                     }
                 }
             }
-            Map<IRecipeType<?>, Map<ResourceLocation, IRecipe<?>>> map = new HashMap<>(recipeManager.recipes);
-            Map<ResourceLocation, IRecipe<?>> craftingRecipes = new HashMap<>(map.getOrDefault(IRecipeType.CRAFTING, Collections.emptyMap()));
-            craftingRecipes.putAll(recipesToInject);
-            map.put(IRecipeType.CRAFTING, ImmutableMap.copyOf(craftingRecipes));
-            recipeManager.recipes = ImmutableMap.copyOf(map);
+            
+            try{
+                // add all existing recipes, since we're gonna replace them
+                allNewRecipes.addAll(recipeManager.getRecipes());
+                recipeManager.replaceRecipes(allNewRecipes);
+            } catch(IllegalStateException e){
+                LOGGER.error("Feeder Helmet: Illegal recipe replacement caught! Report this to author immediately!", e);
+            }
         }
     }
     
     @SubscribeEvent
     public static void updatePlayer(TickEvent.PlayerTickEvent event){
-        if(event.phase == TickEvent.Phase.END && event.player.getCommandSenderWorld().getGameTime() % FeederConfig.GENERAL.WAIT_TICKS.get() == 0){
+        if(event.phase == TickEvent.Phase.END && !event.player.level.isClientSide() && event.player.getCommandSenderWorld().getGameTime() % FeederConfig.GENERAL.WAIT_TICKS.get() == 0){
             ItemStack helmetStack = event.player.inventory.armor.get(EquipmentSlotType.HEAD.getIndex());
             for(IHelmetModule module : MODULES){
                 if(NBTHelper.isModulePresent(module.getTagName(), helmetStack)){
@@ -241,7 +260,11 @@ public class FeederHelmet{
         if(!canWork.get()){
             if(stack.isDamageableItem()){
                 int newDmg = stack.getDamageValue() + FeederConfig.GENERAL.DURABILITY.get();
-                canWork.set(newDmg < stack.getMaxDamage() || FeederConfig.GENERAL.CAN_BREAK.get());
+                if(FeederConfig.GENERAL.CAN_BREAK.get()){
+                    canWork.set(newDmg <= stack.getMaxDamage());
+                } else {
+                    canWork.set(newDmg < stack.getMaxDamage());
+                }
             } else {
                 // There are super-op helmets that aren't damageable, so we need to account for that (eg: Wyvern Armor by Draconic Evolution)
                 canWork.set(true);
