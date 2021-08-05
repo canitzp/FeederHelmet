@@ -12,7 +12,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'maven-publish'
 apply plugin: 'idea'
 
-version = "1.12.2"
+version = "1.12.3"
 group= "de.canitzp.feederhelmet"
 archivesBaseName = "FeederHelmet"
 
@@ -107,7 +107,7 @@ repositories {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.17.1-37.0.9'
+    minecraft 'net.minecraftforge:forge:1.17.1-37.0.25'
     //implementation fg.deobf("mezz.jei:jei-${project.jei_version}")
 }
 

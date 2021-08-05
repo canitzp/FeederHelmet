@@ -112,6 +112,9 @@ public class FeederHelmet{
     @SubscribeEvent
     public static void onWorldLoad(WorldEvent.Load event){
         LevelAccessor levelAccessor = event.getWorld();
+        if(levelAccessor.isClientSide()){
+            return;
+        }
         if(levelAccessor instanceof Level level){
             if(level.dimension() != Level.OVERWORLD){
                 return;
@@ -189,7 +192,7 @@ public class FeederHelmet{
     
     @SubscribeEvent
     public static void updatePlayer(TickEvent.PlayerTickEvent event){
-        if(event.phase == TickEvent.Phase.END && event.player.getCommandSenderWorld().getGameTime() % FeederConfig.GENERAL.WAIT_TICKS.get() == 0){
+        if(event.phase == TickEvent.Phase.END && !event.player.level.isClientSide() && event.player.getCommandSenderWorld().getGameTime() % FeederConfig.GENERAL.WAIT_TICKS.get() == 0){
             ItemStack helmetStack = event.player.getInventory().armor.get(EquipmentSlot.HEAD.getIndex());
             for(IHelmetModule module : MODULES){
                 if(NBTHelper.isModulePresent(module.getTagName(), helmetStack)){
@@ -254,7 +257,11 @@ public class FeederHelmet{
         if(!canWork.get()){
             if(stack.isDamageableItem()){
                 int newDmg = stack.getDamageValue() + FeederConfig.GENERAL.DURABILITY.get();
-                canWork.set(newDmg < stack.getMaxDamage() || FeederConfig.GENERAL.CAN_BREAK.get());
+                if(FeederConfig.GENERAL.CAN_BREAK.get()){
+                    canWork.set(newDmg <= stack.getMaxDamage());
+                } else {
+                    canWork.set(newDmg < stack.getMaxDamage());
+                }
             } else {
                 // There are super-op helmets that aren't damageable, so we need to account for that (eg: Wyvern Armor by Draconic Evolution)
                 canWork.set(true);

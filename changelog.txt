@@ -1,3 +1,7 @@
+1.12.3:
+    - Fixed config option 'can_break' not working at all
+    - Fixed recipe creation on client side
+
 1.12.2:
     - Fixed recipe injection again D:. It should work properly now, I have tested it together with SolarHelmet
 

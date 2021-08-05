@@ -42,39 +42,37 @@ public class FeederModule implements IHelmetModule{
     public void updatePlayer(Player player, ItemStack helmetStack){
         if(player.canEat(false) && FeederHelmet.canDamageBeReducedOrEnergyConsumed(helmetStack)){
             for(ItemStack inventoryStack : player.getInventory().items){
-                if(FeederModule.canHelmetEatStack(player.level, inventoryStack)){
-                    if(FeederModule.canPlayerEat(player, inventoryStack)){
-                        if(player.canEat(false)){
-                            AtomicBoolean hasEnergy = new AtomicBoolean(false);
-                            AtomicBoolean canEat = new AtomicBoolean(false);
-                            helmetStack.getCapability(CapabilityEnergy.ENERGY).ifPresent(energy -> {
-                                hasEnergy.set(true);
-                                int energyConsumption = FeederConfig.GENERAL.ENERGY_CONSUMPTION.get();
-                                if (helmetStack.hasTag()) {
-                                    int energy1 = helmetStack.getTag().getInt("Energy");
-                                    if(energy1 >= energyConsumption){
-                                        helmetStack.getTag().putInt("Energy", energy1 - energyConsumption);
-                                        canEat.set(true);
-                                    }
-                                }
-                            });
-                            if(!hasEnergy.get()){
-                                if(helmetStack.isDamageableItem()){
-                                    helmetStack.setDamageValue(helmetStack.getDamageValue() + FeederConfig.GENERAL.DURABILITY.get());
-                                    if(helmetStack.getMaxDamage() - helmetStack.getDamageValue() <= 0){
-                                        helmetStack.setCount(0);
-                                    }
-                                }
-                                // removed out of damage check if, because there are non-damageable helmets
-                                canEat.set(true);
-                            }
-                            if(canEat.get()){
-                                ForgeEventFactory.onItemUseStart(player, inventoryStack, 0);
-                                ItemStack result = inventoryStack.getItem().finishUsingItem(inventoryStack, player.getCommandSenderWorld(), player);
-                                ForgeEventFactory.onItemUseFinish(player, inventoryStack, 0, result);
-                            }
+                if(!FeederModule.canHelmetEatStack(player.level, inventoryStack) || !FeederModule.canPlayerEat(player, inventoryStack) || !player.canEat(false)){
+                    continue;
+                }
+                AtomicBoolean hasEnergy = new AtomicBoolean(false);
+                AtomicBoolean canEat = new AtomicBoolean(false);
+                helmetStack.getCapability(CapabilityEnergy.ENERGY).ifPresent(energy -> {
+                    hasEnergy.set(true);
+                    int energyConsumption = FeederConfig.GENERAL.ENERGY_CONSUMPTION.get();
+                    if(helmetStack.hasTag()){
+                        int energy1 = helmetStack.getTag().getInt("Energy");
+                        if(energy1 >= energyConsumption){
+                            helmetStack.getTag().putInt("Energy", energy1 - energyConsumption);
+                            canEat.set(true);
                         }
                     }
+                });
+                if(!hasEnergy.get()){
+                    if(helmetStack.isDamageableItem()){
+                        helmetStack.setDamageValue(helmetStack.getDamageValue() + FeederConfig.GENERAL.DURABILITY.get());
+                        if(helmetStack.getMaxDamage() - helmetStack.getDamageValue() <= 0){
+                            helmetStack.setCount(0);
+                        }
+                    }
+                    // removed out of damage check if, because there are non-damageable helmets
+                    canEat.set(true);
+                }
+                if(canEat.get()){
+                    ForgeEventFactory.onItemUseStart(player, inventoryStack, 0);
+                    ItemStack result = inventoryStack.getItem().finishUsingItem(inventoryStack, player.getCommandSenderWorld(), player);
+                    ForgeEventFactory.onItemUseFinish(player, inventoryStack, 0, result);
+                    break;
                 }
             }
         }
