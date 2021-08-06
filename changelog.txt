@@ -1,3 +1,6 @@
+1.11.2:
+    - Once again fixed recipe creation. This time the server crashes on world load due to RecipeManager#replaceRecipes(...) being @OnlyIn(Dist.CLIENT) in MC-1.16.5, but not in higher versions
+
 1.11.1:
     - Update Forge to 1.16.5-36.2.0
     - New way of registering recipes, without the access transformer. This may fix some registering issues. (Same as FeederHelmet-1.12.2)
