@@ -1,12 +1,12 @@
 package de.canitzp.feederhelmet;
 
-import com.google.common.collect.ImmutableMap;
 import de.canitzp.feederhelmet.item.ItemFeederModule;
 import de.canitzp.feederhelmet.item.ItemPhotosynthesisModule;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
@@ -18,10 +18,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.AnvilRepairEvent;
@@ -34,9 +32,9 @@ import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fmllegacy.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegistryObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -208,7 +206,7 @@ public class FeederHelmet{
         ItemStack toRepair = event.getItemInput();
         ItemStack result = event.getItemResult();
         
-        if(toRepair.hasTag() && toRepair.getTag().contains("modules", Constants.NBT.TAG_LIST)){
+        if(toRepair.hasTag() && toRepair.getTag().contains("modules", Tag.TAG_LIST)){
             CompoundTag nbt = result.hasTag() ? result.getTag() : new CompoundTag();
             nbt.put("modules", toRepair.getTag().get("modules"));
             result.setTag(nbt);
@@ -230,9 +228,9 @@ public class FeederHelmet{
         for(ItemStack stack : mergedInventory){
             if(stack.hasTag()){
                 CompoundTag tag = stack.getTag();
-                if(tag.contains("AutoFeederHelmet", Constants.NBT.TAG_BYTE)){
+                if(tag.contains("AutoFeederHelmet", Tag.TAG_BYTE)){
                     tag.remove("AutoFeederHelmet");
-                    ListTag modules = tag.getList("modules", Constants.NBT.TAG_STRING);
+                    ListTag modules = tag.getList("modules", Tag.TAG_STRING);
                     modules.add(StringTag.valueOf("feeder_module"));
                     tag.put("modules", modules);
                 }

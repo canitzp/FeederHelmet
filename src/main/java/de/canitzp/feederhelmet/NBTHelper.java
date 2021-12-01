@@ -5,7 +5,6 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.util.Constants;
 
 public class NBTHelper {
 
@@ -14,8 +13,8 @@ public class NBTHelper {
     }
     
     public static boolean isModulePresent(String module, ItemStack stack){
-        return stack.hasTag() && (stack.getTag().contains("modules", Constants.NBT.TAG_LIST)
-            ? stack.getTag().getList("modules", Constants.NBT.TAG_STRING).stream()
+        return stack.hasTag() && (stack.getTag().contains("modules", Tag.TAG_LIST)
+            ? stack.getTag().getList("modules", Tag.TAG_STRING).stream()
                    .map(Tag::getAsString)
                    .anyMatch(module::equals)
             : stack.getTag().getBoolean(module)); // todo change with breaking release
@@ -23,7 +22,7 @@ public class NBTHelper {
     
     private static ListTag getModulesList(ItemStack stack){
         CompoundTag nbt = stack.hasTag() ? stack.getTag() : new CompoundTag();
-        return nbt.contains("modules", Constants.NBT.TAG_LIST) ? nbt.getList("modules", Constants.NBT.TAG_STRING) : new ListTag();
+        return nbt.contains("modules", Tag.TAG_LIST) ? nbt.getList("modules", Tag.TAG_STRING) : new ListTag();
     }
     
     private static void setModulesList(ItemStack stack, ListTag listNBT){
