@@ -130,6 +130,7 @@ public class FeederHelmet{
                         recipeInputItems.add(Ingredient.of(helmet));
 
                         ItemStack recipeOutputStack = new ItemStack(helmet);
+                        NBTHelper.addModule(module.getTagName(), recipeOutputStack);
 
                         ResourceLocation craftingId = new ResourceLocation(MODID, module.getTagName() + "_" + helmet.getRegistryName().getNamespace() + "_" + helmet.getRegistryName().getPath());
 
@@ -268,5 +269,5 @@ public class FeederHelmet{
         
         return canWork.get();
     }
-    
+
 }
