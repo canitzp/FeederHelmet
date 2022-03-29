@@ -1,3 +1,8 @@
+36.0.0:
+    - 1.16.5 Bugfix with new versioning system
+    -  Fix interaction with Cyclic Uncrafting Grinder.
+        - The Grinder will take a helmet that does not have the feeder module installed in it and uncraft it into itself and a feeder module, allowing for infinite duplication of the helmet and modules.
+
 1.11.2:
     - Once again fixed recipe creation. This time the server crashes on world load due to RecipeManager#replaceRecipes(...) being @OnlyIn(Dist.CLIENT) in MC-1.16.5, but not in higher versions
 

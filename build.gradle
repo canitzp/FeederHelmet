@@ -11,7 +11,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'maven-publish'
 apply plugin: 'idea'
 
-version = "1.11.2"
+version = "36.0.0"
 group= "de.canitzp.feederhelmet"
 archivesBaseName = "FeederHelmet"
 
