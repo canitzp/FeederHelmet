@@ -247,10 +247,7 @@ public class FeederHelmet{
         AtomicBoolean canWork = new AtomicBoolean(false);
         
         stack.getCapability(CapabilityEnergy.ENERGY).ifPresent(energyCapability -> {
-            if (stack.hasTag()) {
-                int energy = stack.getTag().getInt("Energy");
-                canWork.set(energy >= FeederConfig.GENERAL.ENERGY_CONSUMPTION.get());
-            }
+            canWork.set(FeederHelmet.getEnergyOfStack(stack) >= FeederConfig.GENERAL.ENERGY_CONSUMPTION.get());
         });
         
         if(!canWork.get()){
@@ -268,6 +265,29 @@ public class FeederHelmet{
         }
         
         return canWork.get();
+    }
+
+    static final String[] possibleEnergyTags = new String[]{
+            "Energy", // Default
+            "EvolvedEnergy" // ConstructsArmory
+    };
+    public static int getEnergyOfStack(ItemStack stack){
+
+        for (String possibleEnergyTag : possibleEnergyTags) {
+            if(stack.getOrCreateTag().contains(possibleEnergyTag)){
+                return stack.getOrCreateTag().getInt(possibleEnergyTag);
+            }
+        }
+
+        return 0;
+    }
+
+    public static void setEnergyOfStack(ItemStack stack, int energy){
+        for (String possibleEnergyTag : possibleEnergyTags) {
+            if(stack.getOrCreateTag().contains(possibleEnergyTag)){
+                stack.getOrCreateTag().putInt(possibleEnergyTag, energy);
+            }
+        }
     }
 
 }

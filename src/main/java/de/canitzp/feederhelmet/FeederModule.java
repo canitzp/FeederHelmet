@@ -51,9 +51,9 @@ public class FeederModule implements IHelmetModule{
                     hasEnergy.set(true);
                     int energyConsumption = FeederConfig.GENERAL.ENERGY_CONSUMPTION.get();
                     if(helmetStack.hasTag()){
-                        int energy1 = helmetStack.getTag().getInt("Energy");
-                        if(energy1 >= energyConsumption){
-                            helmetStack.getTag().putInt("Energy", energy1 - energyConsumption);
+                        int energyStored = FeederHelmet.getEnergyOfStack(helmetStack);
+                        if(energyStored >= energyConsumption){
+                            FeederHelmet.setEnergyOfStack(helmetStack, energyStored - energyConsumption);
                             canEat.set(true);
                         }
                     }
