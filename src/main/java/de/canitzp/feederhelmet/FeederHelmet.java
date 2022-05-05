@@ -45,17 +45,16 @@ import java.util.Objects;
  * @author canitzp
  */
 @Mod.EventBusSubscriber
-@Mod(modid = FeederHelmet.MODID, name = FeederHelmet.MODNAME, version = FeederHelmet.MODVERSION, acceptedMinecraftVersions = FeederHelmet.MC_VERSIONS)
+@Mod(modid = FeederHelmet.MODID, name = FeederHelmet.MODNAME, acceptedMinecraftVersions = FeederHelmet.MC_VERSIONS)
 public class FeederHelmet{
     
     public static final String MODID = "feederhelmet";
     public static final String MODNAME = "FeederHelmet";
-    public static final String MODVERSION = "@Version@";
-    public static final String MC_VERSIONS = "1.12,1.12.1,1.12.2";
+    public static final String MC_VERSIONS = "1.12.2";
     
     public static final CreativeTabs TAB = new CreativeTabs(MODID){
         @Override
-        public ItemStack createIcon(){
+        public ItemStack getTabIconItem(){
             return new ItemStack(feederModule);
         }
     
@@ -124,7 +123,7 @@ public class FeederHelmet{
                                  NBTTagCompound nbt = new NBTTagCompound();
                                  nbt.setBoolean("AutoFeederHelmet", true);
                                  out.setTagCompound(nbt);
-                                 reg.getRegistry().register(new ShapelessRecipes(MODID + ":feeder_" + item.getTranslationKey(), out, copy){
+                                 reg.getRegistry().register(new ShapelessRecipes(MODID + ":feeder_" + item.getUnlocalizedName(), out, copy){
                                      @Nonnull
                                      @Override
                                      public ItemStack getCraftingResult(InventoryCrafting inv){
@@ -133,7 +132,7 @@ public class FeederHelmet{
                                              ItemStack stack = inv.getStackInSlot(i);
                                              if(!stack.isEmpty() && stack.getItem() instanceof ItemArmor){
                                                  if(stack.hasTagCompound()){
-                                                     nbt = stack.getTagCompound();
+                                                     nbt = stack.getTagCompound().copy();
                                                  }
                                              }
                                          }
@@ -158,7 +157,7 @@ public class FeederHelmet{
                                          }
                                          return super.matches(inv, worldIn);
                                      }
-                                 }.setRegistryName(MODID, "feeder_" + item.getTranslationKey()));
+                                 }.setRegistryName(MODID, "feeder_" + item.getUnlocalizedName()));
                              });
     }
     
@@ -180,14 +179,12 @@ public class FeederHelmet{
                                  .forEach(stack -> {
                                      if(event.player.canEat(false)){
                                          boolean canEat = false;
-                                         if(helmet.hasCapability(CapabilityEnergy.ENERGY, null)){
+                                         if(helmet.hasCapability(CapabilityEnergy.ENERGY, null)) {
                                              // use "energy" nbt tag instead of the capability, so receive only energy storages can be used
-                                             if(helmet.hasTagCompound()){
-                                                 int energy = helmet.getTagCompound().getInteger("Energy");
-                                                 if(energy >= FeederConfig.ENERGY_CONSUMPTION){
-                                                     helmet.getTagCompound().setInteger("Energy", energy - FeederConfig.ENERGY_CONSUMPTION);
-                                                     canEat = true;
-                                                 }
+                                             int energy = FeederHelmet.getEnergyOfStack(helmet);
+                                             if (energy >= FeederConfig.ENERGY_CONSUMPTION) {
+                                                 FeederHelmet.setEnergyOfStack(helmet, energy - FeederConfig.ENERGY_CONSUMPTION);
+                                                 canEat = true;
                                              }
                                          } else if(helmet.isItemStackDamageable()){
                                              helmet.setItemDamage(helmet.getItemDamage() + FeederConfig.DURABILITY);
@@ -237,10 +234,7 @@ public class FeederHelmet{
     private static boolean canWork(@Nonnull ItemStack stack){
         if(stack.hasCapability(CapabilityEnergy.ENERGY, null)){
             // use "energy" nbt tag instead of the capability, so receive only energy storages can be used
-            if(stack.hasTagCompound()){
-                int energy = stack.getTagCompound().getInteger("Energy");
-                return energy >= FeederConfig.ENERGY_CONSUMPTION;
-            }
+            return FeederHelmet.getEnergyOfStack(stack) >= FeederConfig.ENERGY_CONSUMPTION;
         }
         if(stack.isItemStackDamageable()){
             int newDmg = stack.getItemDamage() + FeederConfig.DURABILITY;
@@ -263,6 +257,38 @@ public class FeederHelmet{
                     nbt.setBoolean("AutoFeederHelmet", toRepair.getTagCompound().getBoolean("AutoFeederHelmet"));
                     result.setTagCompound(nbt);
                 }
+            }
+        }
+    }
+
+    static final String[] possibleEnergyTags = new String[]{
+            "Energy", // Default
+            "EvolvedEnergy" // ConstructsArmory
+    };
+    public static int getEnergyOfStack(ItemStack stack){
+
+        if(!stack.hasTagCompound()){
+            return 0;
+        }
+
+        for (String possibleEnergyTag : possibleEnergyTags) {
+            if(stack.getTagCompound().hasKey(possibleEnergyTag)){
+                return stack.getTagCompound().getInteger(possibleEnergyTag);
+            }
+        }
+
+        return 0;
+    }
+
+    public static void setEnergyOfStack(ItemStack stack, int energy){
+
+        if(!stack.hasTagCompound()){
+            return;
+        }
+
+        for (String possibleEnergyTag : possibleEnergyTags) {
+            if(stack.getTagCompound().hasKey(possibleEnergyTag)){
+                stack.getTagCompound().setInteger(possibleEnergyTag, energy);
             }
         }
     }
