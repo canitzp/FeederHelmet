@@ -1,20 +1,14 @@
-buildscript {
-    repositories {
-        // These repositories are only for Gradle plugins, put any other repositories in the repository block further below
-        maven { url = 'https://maven.minecraftforge.net' }
-        mavenCentral()
-    }
-    dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
-    }
+plugins {
+    id "java"
+    id "idea"
+    id "net.minecraftforge.gradle" version "5.1.+"
+    id "com.modrinth.minotaur" version "2.+"
+    id 'net.darkhax.curseforgegradle' version '1.+'
 }
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'maven-publish'
-apply plugin: 'idea'
 
-version = "40.0.0"
-group= "de.canitzp.feederhelmet"
-archivesBaseName = "FeederHelmet"
+version = "${project.mod_version}"
+group = "${project.mod_namespace}"
+archivesBaseName = "${project.mod_name}"
 
 // Mojang ships Java 17 to end users in 1.18+ instead of Java 8 in 1.16.x or lower nor 16 in 1.17.x, so your mod should target Java 17.
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
@@ -129,4 +123,34 @@ idea {
     module {
         inheritOutputDirs = true
     }
+}
+
+modrinth {
+    token = System.getenv("MODRINTH_TOKEN")
+    projectId = "lHGxGDJv"
+    versionNumber = "${project.mod_version}"
+    versionName = "${project.mod_name} - ${project.mod_version} (for 1.18.2)"
+    versionType = "release"
+    uploadFile = jar
+    gameVersions = ["1.18.2"]
+    loaders = ["forge"]
+    changelog = rootProject.file("CHANGELOG.md").text
+    syncBodyFrom = rootProject.file("README.md").text
+}
+
+tasks.modrinth.dependsOn(tasks.modrinthSyncBody)
+
+//noinspection UnnecessaryQualifiedReference
+task publishCurseForge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge) {
+    group = "publishing"
+    apiToken = System.getenv('CURSEFORGE_TOKEN')
+
+    def mainFile = upload(292257, jar)
+    mainFile.displayName = "${project.mod_name} - ${project.mod_version} (for 1.18.2)"
+    mainFile.releaseType = "release"
+    mainFile.changelogType = 'markdown'
+    mainFile.changelog = file("CHANGELOG.md")
+    mainFile.addModLoader("Forge")
+    mainFile.addJavaVersion("Java 17")
+    mainFile.addGameVersion("1.18.2")
 }
