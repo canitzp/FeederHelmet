@@ -2,6 +2,7 @@
 ## Keeping you saturated!
 
 ### Support:
+- 1.19 - normal updates
 - 1.18.2 - normal updates
 - 1.18/1.18.1 - unsupported
 - 1.17.1 - unsupported

@@ -2,7 +2,6 @@ package de.canitzp.feederhelmet;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -35,7 +34,7 @@ public class FeederModule implements IHelmetModule{
     
     @Override
     public void renderTooltip(@Nonnull ItemStack stack, @Nullable Player entityPlayer, List<Component> list, TooltipFlag flags){
-        list.add(new TranslatableComponent("item.feederhelmet:feeder_helmet_module_installed.text").withStyle(ChatFormatting.YELLOW, ChatFormatting.ITALIC));
+        list.add(Component.translatable("item.feederhelmet:feeder_helmet_module_installed.text").withStyle(ChatFormatting.YELLOW, ChatFormatting.ITALIC));
     }
     
     @Override

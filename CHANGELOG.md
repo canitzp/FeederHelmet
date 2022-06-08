@@ -1,3 +1,6 @@
+41.0.0:
+- Update to 1.19
+
 40.0.0:
 - Update to 1.18.2 and removing 1.18.0 and 1.18.1 from compatability list
 - Fix interaction with Cyclic Uncrafting Grinder.

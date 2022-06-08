@@ -132,7 +132,9 @@ public class FeederHelmet{
                         ItemStack recipeOutputStack = new ItemStack(helmet);
                         NBTHelper.addModule(module.getTagName(), recipeOutputStack);
 
-                        ResourceLocation craftingId = new ResourceLocation(MODID, module.getTagName() + "_" + helmet.getRegistryName().getNamespace() + "_" + helmet.getRegistryName().getPath());
+                        ResourceLocation helmetKey = ForgeRegistries.ITEMS.getKey(helmet);
+
+                        ResourceLocation craftingId = new ResourceLocation(MODID, module.getTagName() + "_" + helmetKey.getNamespace() + "_" + helmetKey.getPath());
 
                         ShapelessRecipe recipe = new ShapelessRecipe(craftingId, "", recipeOutputStack, recipeInputItems) {
                             @Nonnull
@@ -173,7 +175,7 @@ public class FeederHelmet{
                         
                         if(recipeManager.getRecipeIds().noneMatch(resourceLocation -> resourceLocation.equals(craftingId))){
                             allNewRecipes.add(recipe);
-                            LOGGER.info(String.format("Feeder Helmet created %s recipe for %s with id '%s'", module.getTagName(), helmet.getRegistryName().toString(), craftingId));
+                            LOGGER.info(String.format("Feeder Helmet created %s recipe for %s with id '%s'", module.getTagName(), helmetKey, craftingId));
                         }
                     }
                 }

@@ -3,11 +3,12 @@ package de.canitzp.feederhelmet;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.registries.ForgeRegistries;
 
 public class ItemStackUtil {
 
     public static String getItemStackResourceLocationString(ItemStack stack){
-        return stack.getItem().getRegistryName().toString();
+        return ForgeRegistries.ITEMS.getKey(stack.getItem()).toString();
     }
     
     public static boolean isFoodBlacklisted(ItemStack stack){

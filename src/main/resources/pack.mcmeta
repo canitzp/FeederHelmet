@@ -1,6 +1,8 @@
 {
    "pack":{
+      "description":"FeederHelmet Resources",
       "pack_format": 9,
-      "description":"FeederHelmet Resources"
+      "forge:resource_pack_format": 9,
+      "forge:data_pack_format": 10
    }
 }
