@@ -8,6 +8,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.profiling.jfr.event.WorldLoadFinishedEvent;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.CraftingContainer;
@@ -25,7 +26,7 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.AnvilRepairEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.world.WorldEvent;
+import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -101,15 +102,15 @@ public class FeederHelmet{
         if(!event.getItemStack().isEmpty()){
             for(IHelmetModule module : MODULES){
                 if(NBTHelper.isModulePresent(module.getTagName(), event.getItemStack())){
-                    module.renderTooltip(event.getItemStack(), event.getPlayer(), event.getToolTip(), event.getFlags());
+                    module.renderTooltip(event.getItemStack(), event.getEntity(), event.getToolTip(), event.getFlags());
                 }
             }
         }
     }
 
     @SubscribeEvent
-    public static void onWorldLoad(WorldEvent.Load event){
-        LevelAccessor levelAccessor = event.getWorld();
+    public static void onWorldLoad(LevelEvent.Load event){
+        LevelAccessor levelAccessor = event.getLevel();
         if(levelAccessor.isClientSide()){
             return;
         }
@@ -206,8 +207,8 @@ public class FeederHelmet{
     // copy modules nbt from old to ew item stack
     @SubscribeEvent
     public static void anvilRepair(AnvilRepairEvent event){
-        ItemStack toRepair = event.getItemInput();
-        ItemStack result = event.getItemResult();
+        ItemStack toRepair = event.getLeft();
+        ItemStack result = event.getOutput();
         
         if(toRepair.hasTag() && toRepair.getTag().contains("modules", Tag.TAG_LIST)){
             CompoundTag nbt = result.hasTag() ? result.getTag() : new CompoundTag();
@@ -218,7 +219,7 @@ public class FeederHelmet{
     
     @SubscribeEvent
     public static void playerJoin(PlayerEvent.PlayerLoggedInEvent event){
-        Player player = event.getPlayer();
+        Player player = event.getEntity();
         NonNullList<ItemStack> armorInventory = player.getInventory().armor;
         NonNullList<ItemStack> mainInventory = player.getInventory().items;
         NonNullList<ItemStack> offHandInventory = player.getInventory().offhand;
