@@ -16,24 +16,13 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 
 minecraft {
-    mappings channel: 'official', version: '1.19'
+    mappings channel: 'official', version: project.mc_version
 
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
     runs {
         client {
             workingDirectory project.file('run')
-
-            // Recommended logging data for a userdev environment
-            // The markers can be changed as needed.
-            // "SCAN": For mods scan.
-            // "REGISTRIES": For firing of registry events.
-            // "REGISTRYDUMP": For getting the contents of all registries.
-            property 'forge.logging.markers', 'REGISTRIES'
-
-            // Recommended logging level for the console
-            // You can set various levels here.
-            // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
             property 'forge.logging.console.level', 'debug'
 
             mods {
@@ -45,17 +34,6 @@ minecraft {
 
         server {
             workingDirectory project.file('run_server')
-
-            // Recommended logging data for a userdev environment
-            // The markers can be changed as needed.
-            // "SCAN": For mods scan.
-            // "REGISTRIES": For firing of registry events.
-            // "REGISTRYDUMP": For getting the contents of all registries.
-            property 'forge.logging.markers', 'REGISTRIES'
-
-            // Recommended logging level for the console
-            // You can set various levels here.
-            // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
             property 'forge.logging.console.level', 'debug'
 
             mods {
@@ -67,17 +45,6 @@ minecraft {
 
         data {
             workingDirectory project.file('run')
-
-            // Recommended logging data for a userdev environment
-            // The markers can be changed as needed.
-            // "SCAN": For mods scan.
-            // "REGISTRIES": For firing of registry events.
-            // "REGISTRYDUMP": For getting the contents of all registries.
-            property 'forge.logging.markers', 'REGISTRIES'
-
-            // Recommended logging level for the console
-            // You can set various levels here.
-            // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
             property 'forge.logging.console.level', 'debug'
 
             args '--mod', 'feederhelmet', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
@@ -95,20 +62,20 @@ minecraft {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
-    /*maven {
+    maven {
         url = "https://dvs1.progwml6.com/files/maven"
-    }*/
+    }
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.19-41.0.94'
-    //implementation fg.deobf("mezz.jei:jei-${project.jei_version}")
+    minecraft "net.minecraftforge:forge:${project.forge_version}"
+    implementation fg.deobf("mezz.jei:jei-${project.jei_version}")
 }
 
 jar {
     manifest {
         attributes([
-                "Specification-Title": "AutoFeederHelmet",
+                "Specification-Title": project.mod_name,
                 "Specification-Vendor": "canitzp",
                 "Specification-Version": "1",
                 "Implementation-Title": project.name,
@@ -129,10 +96,10 @@ modrinth {
     token = System.getenv("MODRINTH_TOKEN")
     projectId = "lHGxGDJv"
     versionNumber = "${project.mod_version}"
-    versionName = "${project.mod_name} - ${project.mod_version} (for 1.19)"
+    versionName = "${project.mod_name} - ${project.mod_version} (for ${project.mc_version})"
     versionType = "release"
     uploadFile = jar
-    gameVersions = ["1.19"]
+    gameVersions = ["${project.mc_version}"]
     loaders = ["forge"]
     changelog = rootProject.file("CHANGELOG.md").text
     syncBodyFrom = rootProject.file("README.md").text
@@ -146,11 +113,11 @@ task publishCurseForge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge)
     apiToken = System.getenv('CURSEFORGE_TOKEN')
 
     def mainFile = upload(292257, jar)
-    mainFile.displayName = "${project.mod_name} - ${project.mod_version} (for 1.19)"
+    mainFile.displayName = "${project.mod_name} - ${project.mod_version} (for ${project.mc_version})"
     mainFile.releaseType = "release"
     mainFile.changelogType = 'markdown'
     mainFile.changelog = file("CHANGELOG.md")
     mainFile.addModLoader("Forge")
     mainFile.addJavaVersion("Java 17")
-    mainFile.addGameVersion("1.19")
+    mainFile.addGameVersion("${project.mc_version}")
 }
