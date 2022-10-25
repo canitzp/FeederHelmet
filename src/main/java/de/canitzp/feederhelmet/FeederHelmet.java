@@ -14,6 +14,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.item.crafting.ShapelessRecipes;
+import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
@@ -39,6 +40,7 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -180,11 +182,12 @@ public class FeederHelmet{
                                      if(event.player.canEat(false)){
                                          boolean canEat = false;
                                          if(helmet.hasCapability(CapabilityEnergy.ENERGY, null)) {
-                                             // use "energy" nbt tag instead of the capability, so receive only energy storages can be used
-                                             int energy = FeederHelmet.getEnergyOfStack(helmet);
-                                             if (energy >= FeederConfig.ENERGY_CONSUMPTION) {
-                                                 FeederHelmet.setEnergyOfStack(helmet, energy - FeederConfig.ENERGY_CONSUMPTION);
-                                                 canEat = true;
+                                             EnergyHandler energyHandler = EnergyHandler.get(helmet);
+                                             if(energyHandler != null){
+                                                 if(energyHandler.canBeUsed(FeederConfig.ENERGY_CONSUMPTION)){
+                                                     energyHandler.use();
+                                                     canEat = true;
+                                                 }
                                              }
                                          } else if(helmet.isItemStackDamageable()){
                                              helmet.setItemDamage(helmet.getItemDamage() + FeederConfig.DURABILITY);
@@ -233,8 +236,8 @@ public class FeederHelmet{
     
     private static boolean canWork(@Nonnull ItemStack stack){
         if(stack.hasCapability(CapabilityEnergy.ENERGY, null)){
-            // use "energy" nbt tag instead of the capability, so receive only energy storages can be used
-            return FeederHelmet.getEnergyOfStack(stack) >= FeederConfig.ENERGY_CONSUMPTION;
+            EnergyHandler energyHandler = EnergyHandler.get(stack);
+            return energyHandler != null && energyHandler.canBeUsed(FeederConfig.ENERGY_CONSUMPTION);
         }
         if(stack.isItemStackDamageable()){
             int newDmg = stack.getItemDamage() + FeederConfig.DURABILITY;
@@ -257,38 +260,6 @@ public class FeederHelmet{
                     nbt.setBoolean("AutoFeederHelmet", toRepair.getTagCompound().getBoolean("AutoFeederHelmet"));
                     result.setTagCompound(nbt);
                 }
-            }
-        }
-    }
-
-    static final String[] possibleEnergyTags = new String[]{
-            "Energy", // Default
-            "EvolvedEnergy" // ConstructsArmory
-    };
-    public static int getEnergyOfStack(ItemStack stack){
-
-        if(!stack.hasTagCompound()){
-            return 0;
-        }
-
-        for (String possibleEnergyTag : possibleEnergyTags) {
-            if(stack.getTagCompound().hasKey(possibleEnergyTag)){
-                return stack.getTagCompound().getInteger(possibleEnergyTag);
-            }
-        }
-
-        return 0;
-    }
-
-    public static void setEnergyOfStack(ItemStack stack, int energy){
-
-        if(!stack.hasTagCompound()){
-            return;
-        }
-
-        for (String possibleEnergyTag : possibleEnergyTags) {
-            if(stack.getTagCompound().hasKey(possibleEnergyTag)){
-                stack.getTagCompound().setInteger(possibleEnergyTag, energy);
             }
         }
     }
