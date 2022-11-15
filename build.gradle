@@ -1,3 +1,5 @@
+import java.util.stream.Stream
+
 plugins {
     id "java"
     id "idea"
@@ -101,8 +103,9 @@ modrinth {
     uploadFile = jar
     gameVersions = ["${project.mc_version}"]
     loaders = ["forge"]
-    changelog = rootProject.file("CHANGELOG.md").text
+    changelog = String.join("\n", rootProject.file("CHANGELOG.md").text.lines().takeWhile(s -> !s.isEmpty()).toList())
     syncBodyFrom = rootProject.file("README.md").text
+    debugMode = false
 }
 
 tasks.modrinth.dependsOn(tasks.modrinthSyncBody)

@@ -1,3 +1,6 @@
+43.1.0:
+- New energy extraction method, which enables EnderIO "empowered"-upgrade and IC2-EU (1EU=4FE) capability. Closes #31
+
 43.0.0:
 - Update to 1.19.2
 

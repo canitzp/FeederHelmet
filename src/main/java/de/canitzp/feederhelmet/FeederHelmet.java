@@ -21,6 +21,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.AnvilRepairEvent;
@@ -249,8 +250,8 @@ public class FeederHelmet{
     public static boolean canDamageBeReducedOrEnergyConsumed(@Nonnull ItemStack stack){
         AtomicBoolean canWork = new AtomicBoolean(false);
         
-        stack.getCapability(CapabilityEnergy.ENERGY).ifPresent(energyCapability -> {
-            canWork.set(FeederHelmet.getEnergyOfStack(stack) >= FeederConfig.GENERAL.ENERGY_CONSUMPTION.get());
+        stack.getCapability(ForgeCapabilities.ENERGY).ifPresent(energyCapability -> {
+            canWork.set(true);
         });
         
         if(!canWork.get()){
@@ -268,29 +269,6 @@ public class FeederHelmet{
         }
         
         return canWork.get();
-    }
-
-    static final String[] possibleEnergyTags = new String[]{
-            "Energy", // Default
-            "EvolvedEnergy" // ConstructsArmory
-    };
-    public static int getEnergyOfStack(ItemStack stack){
-
-        for (String possibleEnergyTag : possibleEnergyTags) {
-            if(stack.getOrCreateTag().contains(possibleEnergyTag)){
-                return stack.getOrCreateTag().getInt(possibleEnergyTag);
-            }
-        }
-
-        return 0;
-    }
-
-    public static void setEnergyOfStack(ItemStack stack, int energy){
-        for (String possibleEnergyTag : possibleEnergyTags) {
-            if(stack.getOrCreateTag().contains(possibleEnergyTag)){
-                stack.getOrCreateTag().putInt(possibleEnergyTag, energy);
-            }
-        }
     }
 
 }

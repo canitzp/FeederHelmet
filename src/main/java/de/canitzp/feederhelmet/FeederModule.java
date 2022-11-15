@@ -7,6 +7,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.event.ForgeEventFactory;
 
@@ -46,13 +47,12 @@ public class FeederModule implements IHelmetModule{
                 }
                 AtomicBoolean hasEnergy = new AtomicBoolean(false);
                 AtomicBoolean canEat = new AtomicBoolean(false);
-                helmetStack.getCapability(CapabilityEnergy.ENERGY).ifPresent(energy -> {
+                helmetStack.getCapability(ForgeCapabilities.ENERGY).ifPresent(energy -> {
                     hasEnergy.set(true);
-                    int energyConsumption = FeederConfig.GENERAL.ENERGY_CONSUMPTION.get();
-                    if(helmetStack.hasTag()){
-                        int energyStored = FeederHelmet.getEnergyOfStack(helmetStack);
-                        if(energyStored >= energyConsumption){
-                            FeederHelmet.setEnergyOfStack(helmetStack, energyStored - energyConsumption);
+                    EnergyHandler energyHandler = EnergyHandler.get(helmetStack);
+                    if(energyHandler != null){
+                        if(energyHandler.canBeUsed(FeederConfig.GENERAL.ENERGY_CONSUMPTION.get())){
+                            energyHandler.use();
                             canEat.set(true);
                         }
                     }
