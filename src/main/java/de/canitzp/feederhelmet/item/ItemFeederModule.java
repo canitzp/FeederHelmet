@@ -18,7 +18,7 @@ import java.util.List;
 public class ItemFeederModule extends Item {
 
     public ItemFeederModule(){
-        super(new Properties().tab(FeederHelmet.TAB).stacksTo(1));
+        super(new Properties().stacksTo(1));
     }
 
     @Override

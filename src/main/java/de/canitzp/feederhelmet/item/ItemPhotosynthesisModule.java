@@ -15,7 +15,7 @@ import java.util.List;
 public class ItemPhotosynthesisModule extends Item {
     
     public ItemPhotosynthesisModule(){
-        super(new Properties().tab(FeederHelmet.TAB).stacksTo(1));
+        super(new Properties().stacksTo(1));
     }
     
     @Override

@@ -8,12 +8,10 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.profiling.jfr.event.WorldLoadFinishedEvent;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
@@ -22,7 +20,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.energy.CapabilityEnergy;
+import net.minecraftforge.event.CreativeModeTabEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.AnvilRepairEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
@@ -61,38 +59,12 @@ public class FeederHelmet{
     
     public static final List<IHelmetModule> MODULES = new ArrayList<>();
     
-    public static final CreativeModeTab TAB = new CreativeModeTab(MODID){
-        @Override
-        public ItemStack makeIcon(){
-            return new ItemStack(FEEDER_HELMET_MODULE_ITEM.get());
-        }
-
-        @OnlyIn(Dist.CLIENT)
-        @Override
-        public void fillItemList(NonNullList<ItemStack> stacks){
-            for(IHelmetModule module : MODULES){
-                stacks.add(new ItemStack(module.getCorrespondingModuleItem()));
-                for(Item item : ForgeRegistries.ITEMS){
-                    if(module.isModuleApplicableTo(item.getDefaultInstance())){
-                        ItemStack stack = new ItemStack(item);
-                        CompoundTag tag = new CompoundTag();
-                        ListTag modulesList = new ListTag();
-                        modulesList.add(StringTag.valueOf(module.getTagName()));
-                        tag.put("modules", modulesList);
-                        stack.setTag(tag);
-                        stacks.add(stack);
-                    }
-                }
-            }
-        }
-    };
-    
-    public FeederHelmet(){
+    public FeederHelmet() {
         LOGGER.info("Feeder Helmet loading...");
         MODULES.add(new FeederModule());
-        
+
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, FeederConfig.spec);
-        
+
         ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
         LOGGER.info("Feeder Helmet loaded.");
     }
@@ -138,7 +110,7 @@ public class FeederHelmet{
 
                         ResourceLocation craftingId = new ResourceLocation(MODID, module.getTagName() + "_" + helmetKey.getNamespace() + "_" + helmetKey.getPath());
 
-                        ShapelessRecipe recipe = new ShapelessRecipe(craftingId, "", recipeOutputStack, recipeInputItems) {
+                        ShapelessRecipe recipe = new ShapelessRecipe(craftingId, "", CraftingBookCategory.EQUIPMENT, recipeOutputStack, recipeInputItems) {
                             @Nonnull
                             @Override
                             public ItemStack assemble(CraftingContainer inv){
@@ -242,7 +214,7 @@ public class FeederHelmet{
             }
         }
     }
-    
+
     public static boolean isItemHelmet(ItemStack stack){
         return (stack.getItem() instanceof ArmorItem && ((ArmorItem) stack.getItem()).getSlot() == EquipmentSlot.HEAD && !ItemStackUtil.isHelmetBlacklisted(stack)) || ItemStackUtil.isHelmetWhitelisted(stack);
     }
