@@ -22,7 +22,7 @@ public class FeederTab {
         event.registerCreativeModeTab(new ResourceLocation(MODID, "tab"), builder -> {
             builder.icon(() -> FEEDER_HELMET_MODULE_ITEM.get().getDefaultInstance());
             builder.title(Component.translatable("tab.feederhelmet:general"));
-            builder.displayItems((featureFlagSet, output, hasOp) -> {
+            builder.displayItems((parameters, output) -> {
                 for(IHelmetModule module : MODULES){
                     output.accept(new ItemStack(module.getCorrespondingModuleItem()));
                     for(Item item : ForgeRegistries.ITEMS){

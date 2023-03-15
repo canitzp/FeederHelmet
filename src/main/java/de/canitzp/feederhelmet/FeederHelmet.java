@@ -3,6 +3,7 @@ package de.canitzp.feederhelmet;
 import de.canitzp.feederhelmet.item.ItemFeederModule;
 import de.canitzp.feederhelmet.item.ItemPhotosynthesisModule;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -20,7 +21,6 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.event.CreativeModeTabEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.AnvilRepairEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
@@ -113,7 +113,7 @@ public class FeederHelmet{
                         ShapelessRecipe recipe = new ShapelessRecipe(craftingId, "", CraftingBookCategory.EQUIPMENT, recipeOutputStack, recipeInputItems) {
                             @Nonnull
                             @Override
-                            public ItemStack assemble(CraftingContainer inv){
+                            public ItemStack assemble(CraftingContainer inv, RegistryAccess access){
                                 CompoundTag nbt = new CompoundTag();
                                 for(int i = 0; i < inv.getContainerSize(); i++){
                                     ItemStack stack = inv.getItem(i);
@@ -123,7 +123,7 @@ public class FeederHelmet{
                                         }
                                     }
                                 }
-                                ItemStack out = super.assemble(inv);
+                                ItemStack out = super.assemble(inv, access);
                                 out.setTag(nbt);
                                 NBTHelper.addModule(module.getTagName(), out);
                                 return out;
@@ -216,7 +216,7 @@ public class FeederHelmet{
     }
 
     public static boolean isItemHelmet(ItemStack stack){
-        return (stack.getItem() instanceof ArmorItem && ((ArmorItem) stack.getItem()).getSlot() == EquipmentSlot.HEAD && !ItemStackUtil.isHelmetBlacklisted(stack)) || ItemStackUtil.isHelmetWhitelisted(stack);
+        return (stack.getItem() instanceof ArmorItem && ((ArmorItem) stack.getItem()).getType().getSlot() == EquipmentSlot.HEAD && !ItemStackUtil.isHelmetBlacklisted(stack)) || ItemStackUtil.isHelmetWhitelisted(stack);
     }
     
     public static boolean canDamageBeReducedOrEnergyConsumed(@Nonnull ItemStack stack){

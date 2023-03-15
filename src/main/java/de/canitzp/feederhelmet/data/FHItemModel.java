@@ -11,7 +11,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 public class FHItemModel extends ItemModelProvider {
 
     public FHItemModel(DataGenerator generator, ExistingFileHelper existingFileHelper) {
-        super(generator, FeederHelmet.MODID, existingFileHelper);
+        super(generator.getPackOutput(), FeederHelmet.MODID, existingFileHelper);
     }
 
     @Override
