@@ -1,3 +1,18 @@
+40.1.0:
+43.2.0:
+45.1.0:
+- Reworked recipes:
+  - modules are now applied within the smiting table (upgrade)
+  - removal of the module is now possible by simply putting th helmet into a crafting grid (Fixes #32)
+- 40.1.0 only:
+  - New energy extraction method, which enables EnderIO "empowered"-upgrade and IC2-EU (1EU=4FE) capability. Closes #31
+
+45.0.0:
+- Update to 1.19.4 (Not backwards compatible)
+
+44.0.0:
+- Update to 1.19.3 (Not backwards compatible)
+
 43.1.0:
 - New energy extraction method, which enables EnderIO "empowered"-upgrade and IC2-EU (1EU=4FE) capability. Closes #31
 

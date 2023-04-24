@@ -22,7 +22,6 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.AnvilRepairEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
@@ -86,13 +85,13 @@ public class FeederHelmet{
             }
         }
     };
-    
+
     public FeederHelmet(){
         LOGGER.info("Feeder Helmet loading...");
         MODULES.add(new FeederModule());
-        
+
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, FeederConfig.spec);
-        
+
         ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
         LOGGER.info("Feeder Helmet loaded.");
     }
@@ -127,57 +126,25 @@ public class FeederHelmet{
             for(IHelmetModule module : MODULES){
                 for(Item helmet : ForgeRegistries.ITEMS.getValues()){
                     if(module.isModuleApplicableTo(helmet.getDefaultInstance())){
-                        NonNullList<Ingredient> recipeInputItems = NonNullList.create();
-                        recipeInputItems.add(Ingredient.of(module.getCorrespondingModuleItem()));
-                        recipeInputItems.add(Ingredient.of(helmet));
-
-                        ItemStack recipeOutputStack = new ItemStack(helmet);
-                        NBTHelper.addModule(module.getTagName(), recipeOutputStack);
-
                         ResourceLocation helmetKey = ForgeRegistries.ITEMS.getKey(helmet);
+                        // create recipe id for creation recipe
+                        ResourceLocation creationCraftingId = new ResourceLocation(MODID, module.getTagName() + "_creation_" + helmetKey.getNamespace() + "_" + helmetKey.getPath());
+                        // create recipe id for removal recipe
+                        ResourceLocation removalCraftingId = new ResourceLocation(MODID, module.getTagName() + "_removal_" + helmetKey.getNamespace() + "_" + helmetKey.getPath());
+                        // create recipe for creation
+                        Recipe<?> creationRecipe = FeederRecipeManager.creationRecipe(module, helmet, creationCraftingId);
+                        // create recipe for removal
+                        Recipe<?> removalRecipe = FeederRecipeManager.removalRecipe(module, helmet, removalCraftingId);
 
-                        ResourceLocation craftingId = new ResourceLocation(MODID, module.getTagName() + "_" + helmetKey.getNamespace() + "_" + helmetKey.getPath());
-
-                        ShapelessRecipe recipe = new ShapelessRecipe(craftingId, "", recipeOutputStack, recipeInputItems) {
-                            @Nonnull
-                            @Override
-                            public ItemStack assemble(CraftingContainer inv){
-                                CompoundTag nbt = new CompoundTag();
-                                for(int i = 0; i < inv.getContainerSize(); i++){
-                                    ItemStack stack = inv.getItem(i);
-                                    if(!stack.isEmpty() && stack.getItem() instanceof ArmorItem){
-                                        if(stack.hasTag()){
-                                            nbt = stack.getTag().copy();
-                                        }
-                                    }
-                                }
-                                ItemStack out = super.assemble(inv);
-                                out.setTag(nbt);
-                                NBTHelper.addModule(module.getTagName(), out);
-                                return out;
-                            }
-
-                            // checks if the helmet doesn't already have the module
-                            @Override
-                            public boolean matches(CraftingContainer inv, Level level1){
-                                if(super.matches(inv, level1)){
-                                    for(int i = 0; i < inv.getContainerSize(); i++){
-                                        ItemStack stack = inv.getItem(i);
-                                        if(!stack.isEmpty() && stack.getItem() instanceof ArmorItem){
-                                            if(NBTHelper.isModulePresent(module.getTagName(), stack)){
-                                                return false;
-                                            }
-                                        }
-                                    }
-                                    return true;
-                                }
-                                return false;
-                            }
-                        };
-                        
-                        if(recipeManager.getRecipeIds().noneMatch(resourceLocation -> resourceLocation.equals(craftingId))){
-                            allNewRecipes.add(recipe);
-                            LOGGER.info(String.format("Feeder Helmet created %s recipe for %s with id '%s'", module.getTagName(), helmetKey, craftingId));
+                        // add creation recipe to recipes list
+                        if(recipeManager.getRecipeIds().noneMatch(resourceLocation -> resourceLocation.equals(creationCraftingId))){
+                            allNewRecipes.add(creationRecipe);
+                            LOGGER.info(String.format("Feeder Helmet created %s recipe for %s with id '%s'", module.getTagName(), helmetKey, creationCraftingId));
+                        }
+                        // add removal recipe to recipes list
+                        if(recipeManager.getRecipeIds().noneMatch(resourceLocation -> resourceLocation.equals(removalCraftingId))){
+                            allNewRecipes.add(removalRecipe);
+                            LOGGER.info(String.format("Feeder Helmet created %s recipe for %s with id '%s'", module.getTagName(), helmetKey, removalCraftingId));
                         }
                     }
                 }
@@ -242,7 +209,7 @@ public class FeederHelmet{
             }
         }
     }
-    
+
     public static boolean isItemHelmet(ItemStack stack){
         return (stack.getItem() instanceof ArmorItem && ((ArmorItem) stack.getItem()).getSlot() == EquipmentSlot.HEAD && !ItemStackUtil.isHelmetBlacklisted(stack)) || ItemStackUtil.isHelmetWhitelisted(stack);
     }
