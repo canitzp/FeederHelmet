@@ -4,7 +4,7 @@
 ### Support:
 - 1.19.4 - normal updates
 - 1.19.3 - Bugfix only
-- 1.19.2 - Bugfix only
+- 1.19.2 - normal updates (only because of popularity)
 - 1.18.2 - normal updates
 - 1.18.1 - unsupported
 - 1.18 - unsupported
@@ -22,6 +22,8 @@ Once crafted you put it into a crafting grid with any helmet (modded or vanilla)
 
 Any helmet with this trait will automatically consume any food items in your inventory when you are hungry.  
 This way you will never have to deal with eating again,  just make sure to always have some food with you.
+
+Since 40.1.0/43.2.0/45.1.0 you craft the helmet and the module together in the smithing table. You now also can uncraft it, by putting the helmet in any crafting grid.
 
 ### Notes
 - Some helmets may have different code structures, so it won't work on any helmet, but with most it is fine.
