@@ -4,6 +4,8 @@
 - Reworked recipes:
   - modules are now applied within the smiting table (upgrade)
   - removal of the module is now possible by simply putting th helmet into a crafting grid (Fixes #32)
+- 43.2.0 and 45.1.0 only:
+  - Add new energy extraction method for mekanism mekasuit 
 - 40.1.0 only:
   - New energy extraction method, which enables EnderIO "empowered"-upgrade and IC2-EU (1EU=4FE) capability. Closes #31
 
