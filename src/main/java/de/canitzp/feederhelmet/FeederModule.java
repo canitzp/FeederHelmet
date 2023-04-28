@@ -49,11 +49,10 @@ public class FeederModule implements IHelmetModule{
                 AtomicBoolean canEat = new AtomicBoolean(false);
                 helmetStack.getCapability(CapabilityEnergy.ENERGY).ifPresent(energy -> {
                     hasEnergy.set(true);
-                    int energyConsumption = FeederConfig.GENERAL.ENERGY_CONSUMPTION.get();
-                    if(helmetStack.hasTag()){
-                        int energyStored = FeederHelmet.getEnergyOfStack(helmetStack);
-                        if(energyStored >= energyConsumption){
-                            FeederHelmet.setEnergyOfStack(helmetStack, energyStored - energyConsumption);
+                    EnergyHandler energyHandler = EnergyHandler.get(helmetStack);
+                    if(energyHandler != null){
+                        if(energyHandler.canBeUsed(FeederConfig.GENERAL.ENERGY_CONSUMPTION.get())){
+                            energyHandler.use();
                             canEat.set(true);
                         }
                     }

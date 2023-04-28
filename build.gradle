@@ -98,10 +98,15 @@ repositories {
     /*maven {
         url = "https://dvs1.progwml6.com/files/maven"
     }*/
+    maven {
+        url = "https://www.cursemaven.com"
+    }
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.18.2-40.0.32'
+    minecraft 'net.minecraftforge:forge:1.18.2-40.1.27'
+    runtimeOnly fg.deobf("curse.maven:mekanism-268560:3875976")
+    runtimeOnly fg.deobf("curse.maven:mekanism-tools-268567:3875979")
     //implementation fg.deobf("mezz.jei:jei-${project.jei_version}")
 }
 
