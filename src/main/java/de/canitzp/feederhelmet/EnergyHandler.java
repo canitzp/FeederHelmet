@@ -1,7 +1,10 @@
 package de.canitzp.feederhelmet;
 
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
+import org.apache.commons.lang3.math.NumberUtils;
 
 import javax.annotation.Nonnull;
 
@@ -20,6 +23,12 @@ public abstract class EnergyHandler {
         }
         if(stack.getTag().contains("enderio.darksteel.upgrade.energyUpgrade", Tag.TAG_COMPOUND)){
             return new EnderIOEnergyUpgrade(stack);
+        }
+        if(stack.getTag().contains("mekData", Tag.TAG_COMPOUND)){
+            CompoundTag mekData = stack.getTag().getCompound("mekData");
+            if(mekData.contains("EnergyContainers", Tag.TAG_LIST)){
+                return new MekanismMekaSuit(stack, mekData.getList("EnergyContainers", Tag.TAG_COMPOUND));
+            }
         }
         if(stack.getTag().contains("charge", Tag.TAG_DOUBLE)){
             return new IC2(stack);
@@ -78,6 +87,54 @@ public abstract class EnergyHandler {
         @Override
         public void use() {
             super.stack.getTag().getCompound("enderio.darksteel.upgrade.energyUpgrade").putInt("energy", this.energyAfterUsage);
+        }
+    }
+
+    public static class MekanismMekaSuit extends EnergyHandler {
+
+        private ListTag tagEnergyContainers;
+        private int energy, energyToExtract;
+
+        public MekanismMekaSuit(ItemStack stack, ListTag tagEnergyContainers) {
+            super(stack);
+            this.tagEnergyContainers = tagEnergyContainers;
+            for (Tag tag : tagEnergyContainers) {
+                if(tag instanceof CompoundTag compound){
+                    String storedAsString = compound.getString("stored");
+                    if (NumberUtils.isParsable(storedAsString)) {
+                        this.energy += NumberUtils.toInt(storedAsString, 0);
+                    }
+                }
+            }
+            this.energy = Math.round(this.energy / 2.5F); // mekanism stores in MJ and therefor it has to be converted by division with 2.5
+        }
+
+        @Override
+        public boolean canBeUsed(int energyToExtract) {
+            this.energyToExtract = energyToExtract;
+            return this.energy - energyToExtract >= 0;
+        }
+
+        @Override
+        public void use() {
+            this.energyToExtract = Math.round(this.energyToExtract * 2.5F); // energy conversion from RF/FE to MJ
+            for (Tag energyContainer : this.tagEnergyContainers) {
+                if(energyContainer instanceof CompoundTag tag){
+                    String storedAsString = tag.getString("stored");
+                    int stored = 0;
+                    if(NumberUtils.isParsable(storedAsString)){
+                        stored = NumberUtils.toInt(storedAsString, 0);
+                    }
+                    // calculate how much energy can be extracted
+                    int energyAfterExtract = Math.max(0, stored - this.energyToExtract);
+                    // calculate how much energy has to be extracted from the next storages
+                    this.energyToExtract = stored - energyAfterExtract;
+                    tag.putString("stored", Integer.toString(energyAfterExtract));
+                    if(this.energyToExtract <= 0){
+                        break;
+                    }
+                }
+            }
         }
     }
 
