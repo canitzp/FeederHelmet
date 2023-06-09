@@ -18,23 +18,57 @@ public class FeederRecipeManager {
     public static Recipe<?> creationRecipe(final IHelmetModule module, final Item helmet, final ResourceLocation craftingId){
         ItemStack outputStack = helmet.getDefaultInstance();
         NBTHelper.addModule(module.getTagName(), outputStack);
-        return new LegacyUpgradeRecipe(craftingId, Ingredient.of(helmet), Ingredient.of(FeederHelmet.FEEDER_HELMET_MODULE_ITEM.get()), outputStack){
+
+        return new SmithingRecipe() {
             @Override
-            public @NotNull ItemStack assemble(@NotNull Container container, RegistryAccess access) {
-                ItemStack assembled = super.assemble(container, access);
+            public boolean isTemplateIngredient(ItemStack stack) {
+                return stack.isEmpty();
+            }
+
+            @Override
+            public boolean isBaseIngredient(ItemStack stack) {
+                return stack.is(helmet) && !NBTHelper.isModulePresent(module.getTagName(), stack);
+            }
+
+            @Override
+            public boolean isAdditionIngredient(ItemStack stack) {
+                return stack.is(FeederHelmet.FEEDER_HELMET_MODULE_ITEM.get());
+            }
+
+            @Override
+            public boolean matches(Container container, Level level) {
+                ItemStack helmetStack = container.getItem(1);
+                if(!helmetStack.is(helmet)){
+                    return false;
+                }
+                ItemStack moduleStack = container.getItem(2);
+                if(!moduleStack.is(FeederHelmet.FEEDER_HELMET_MODULE_ITEM.get())){
+                    return false;
+                }
+
+                return !NBTHelper.isModulePresent(module.getTagName(), helmetStack);
+            }
+
+            @Override
+            public ItemStack assemble(Container container, RegistryAccess access) {
+                ItemStack assembled = this.getResultItem(access).copy();
                 NBTHelper.addModule(module.getTagName(), assembled);
                 return assembled;
             }
 
-            // checks if the helmet doesn't already have the module
             @Override
-            public boolean matches(Container container, Level level) {
-                boolean matches = super.matches(container, level);
-                if(!matches){
-                    return false;
-                }
-                ItemStack helmetInputStack = container.getItem(0);
-                return !NBTHelper.isModulePresent(module.getTagName(), helmetInputStack);
+            public ItemStack getResultItem(RegistryAccess access) {
+                return outputStack;
+            }
+
+            @Override
+            public ResourceLocation getId() {
+                return craftingId;
+            }
+
+            @Override
+            public RecipeSerializer<?> getSerializer() {
+                return RecipeSerializer.SMITHING_TRANSFORM;
             }
         };
     }

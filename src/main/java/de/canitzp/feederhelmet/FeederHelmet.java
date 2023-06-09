@@ -4,6 +4,7 @@ import de.canitzp.feederhelmet.item.ItemFeederModule;
 import de.canitzp.feederhelmet.item.ItemPhotosynthesisModule;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -13,6 +14,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
@@ -52,6 +54,9 @@ public class FeederHelmet{
     public static final String MODID = "feederhelmet";
     
     private static final Logger LOGGER = LogManager.getLogger(FeederHelmet.MODID);
+
+    public static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
+    public static final RegistryObject<CreativeModeTab> TAB = TABS.register("tab", FeederTab::create);
     
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
     public static final RegistryObject<ItemFeederModule> FEEDER_HELMET_MODULE_ITEM = ITEMS.register("feeder_helmet_module", ItemFeederModule::new);
@@ -65,6 +70,7 @@ public class FeederHelmet{
 
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, FeederConfig.spec);
 
+        TABS.register(FMLJavaModLoadingContext.get().getModEventBus());
         ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
         LOGGER.info("Feeder Helmet loaded.");
     }
@@ -135,7 +141,7 @@ public class FeederHelmet{
     
     @SubscribeEvent
     public static void updatePlayer(TickEvent.PlayerTickEvent event){
-        if(event.phase == TickEvent.Phase.END && !event.player.level.isClientSide() && event.player.getCommandSenderWorld().getGameTime() % FeederConfig.GENERAL.WAIT_TICKS.get() == 0){
+        if(event.phase == TickEvent.Phase.END && !event.player.level().isClientSide() && event.player.getCommandSenderWorld().getGameTime() % FeederConfig.GENERAL.WAIT_TICKS.get() == 0){
             ItemStack helmetStack = event.player.getInventory().armor.get(EquipmentSlot.HEAD.getIndex());
             for(IHelmetModule module : MODULES){
                 if(NBTHelper.isModulePresent(module.getTagName(), helmetStack)){

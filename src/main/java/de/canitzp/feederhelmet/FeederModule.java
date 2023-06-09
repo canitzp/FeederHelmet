@@ -8,7 +8,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.event.ForgeEventFactory;
 
 import javax.annotation.Nonnull;
@@ -42,7 +41,7 @@ public class FeederModule implements IHelmetModule{
     public void updatePlayer(Player player, ItemStack helmetStack){
         if(player.canEat(false) && FeederHelmet.canDamageBeReducedOrEnergyConsumed(helmetStack)){
             for(ItemStack inventoryStack : player.getInventory().items){
-                if(!FeederModule.canHelmetEatStack(player.level, inventoryStack) || !FeederModule.canPlayerEat(player, inventoryStack) || !player.canEat(false)){
+                if(!FeederModule.canHelmetEatStack(player.level(), inventoryStack) || !FeederModule.canPlayerEat(player, inventoryStack) || !player.canEat(false)){
                     continue;
                 }
                 AtomicBoolean hasEnergy = new AtomicBoolean(false);
