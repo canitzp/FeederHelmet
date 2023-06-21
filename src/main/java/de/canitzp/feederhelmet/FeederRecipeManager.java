@@ -37,21 +37,15 @@ public class FeederRecipeManager {
 
             @Override
             public boolean matches(Container container, Level level) {
-                ItemStack helmetStack = container.getItem(1);
-                if(!helmetStack.is(helmet)){
-                    return false;
-                }
-                ItemStack moduleStack = container.getItem(2);
-                if(!moduleStack.is(FeederHelmet.FEEDER_HELMET_MODULE_ITEM.get())){
-                    return false;
-                }
-
-                return !NBTHelper.isModulePresent(module.getTagName(), helmetStack);
+                return isTemplateIngredient(container.getItem(0)) && isBaseIngredient(container.getItem(1)) && isAdditionIngredient(container.getItem(2));
             }
 
             @Override
             public ItemStack assemble(Container container, RegistryAccess access) {
                 ItemStack assembled = this.getResultItem(access).copy();
+                // copy old nbt to new stack
+                assembled.getOrCreateTag().merge(container.getItem(1).getOrCreateTag());
+                // set module flag
                 NBTHelper.addModule(module.getTagName(), assembled);
                 return assembled;
             }

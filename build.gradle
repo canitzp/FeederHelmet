@@ -124,14 +124,14 @@ modrinth {
     token = System.getenv("MODRINTH_TOKEN")
     projectId = "lHGxGDJv"
     versionNumber = "${project.mod_version}"
-    versionName = "${project.mod_name} - ${project.mod_version} (for ${project.mc_version})"
+    versionName = "${project.mod_name} - ${project.mod_version} (for ${project.release_minecraft_versions})"
     versionType = "release"
     uploadFile = jar
-    gameVersions = ["${project.mc_version}"]
-    loaders = ["forge"]
+    gameVersions = project.release_minecraft_versions.split("/").collect()
+    loaders = project.release_mod_loaders.split("/").collect()
     changelog = String.join("\n", rootProject.file("CHANGELOG.md").text.lines().takeWhile(s -> !s.isEmpty()).toList())
     syncBodyFrom = rootProject.file("README.md").text
-    debugMode = false
+    //debugMode = true
 }
 
 tasks.modrinth.dependsOn(tasks.modrinthSyncBody)
@@ -142,11 +142,18 @@ task publishCurseForge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge)
     apiToken = System.getenv('CURSEFORGE_TOKEN')
 
     def mainFile = upload(292257, jar)
-    mainFile.displayName = "${project.mod_name} - ${project.mod_version} (for ${project.mc_version})"
+    mainFile.displayName = "${project.mod_name} - ${project.mod_version} (for ${project.release_minecraft_versions})"
     mainFile.releaseType = "release"
     mainFile.changelogType = 'markdown'
     mainFile.changelog = file("CHANGELOG.md")
-    mainFile.addModLoader("Forge")
-    mainFile.addJavaVersion("Java 17")
-    mainFile.addGameVersion("${project.mc_version}")
+    for (final def modloader in "${project.release_mod_loaders}".split("/")) {
+        mainFile.addModLoader("${modloader}")
+    }
+    for (final def java_version in "${project.release_java_versions}".split("/")) {
+        mainFile.addJavaVersion("${java_version}")
+    }
+    for (final def minecraft_version in "${project.release_minecraft_versions}".split("/")) {
+        mainFile.addGameVersion("${minecraft_version}")
+    }
+    //debugMode = true
 }

@@ -1,5 +1,8 @@
+46.0.1:
+- Fix bug where previous nbt (like custom name) is lost, when applying the module
+
 46.0.0:
-- Update to 1.20.0
+- Update to 1.20/1.20.1
 
 40.1.0:
 43.2.0:
