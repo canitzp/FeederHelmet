@@ -128,7 +128,7 @@ modrinth {
     versionType = "release"
     uploadFile = jar
     gameVersions = project.release_minecraft_versions.split("/").collect()
-    loaders = project.release_mod_loaders.split("/").collect()
+    loaders = project.release_mod_loaders.toLowerCase().split("/").collect()
     changelog = String.join("\n", rootProject.file("CHANGELOG.md").text.lines().takeWhile(s -> !s.isEmpty()).toList())
     syncBodyFrom = rootProject.file("README.md").text
     //debugMode = true
