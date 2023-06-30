@@ -2,16 +2,15 @@
 ## Keeping you saturated!
 
 ### Support:
-- 1.20/1.20.1 - normal updates
-- 1.19.4 - normal updates
+- 1.20.1 - normal updates
+- 1.20 - Bugfix only
+- 1.19.4 - Bugfix only
 - 1.19.3 - unsupported
-- 1.19.2 - normal updates (only because of popularity)
-- 1.18.2 - Bugfix only
-- 1.18.1 - unsupported
-- 1.18 - unsupported
-- 1.17 - unsupported
-- 1.16.5 - Bugfix only
-- 1.12.2 - Bugfix only
+- 1.19.2 - Bugfix only
+- 1.18.x - unsupported
+- 1.17.x - unsupported
+- 1.16.x - unsupported
+- 1.12.x - unsupported
 
 ### About
 Auto Feeder Helmet is a Minecraft mod since version 1.12.2 that adds a simple way off staying saturated.
