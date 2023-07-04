@@ -1,70 +1,23 @@
 package de.canitzp.feederhelmet;
 
+import de.canitzp.feederhelmet.recipe.RecipeModuleAddition;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.Container;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.NotNull;
 
 public class FeederRecipeManager {
 
-    @SuppressWarnings("removal")
     public static Recipe<?> creationRecipe(final IHelmetModule module, final Item helmet, final ResourceLocation craftingId){
         ItemStack outputStack = helmet.getDefaultInstance();
         NBTHelper.addModule(module.getTagName(), outputStack);
 
-        return new SmithingRecipe() {
-            @Override
-            public boolean isTemplateIngredient(ItemStack stack) {
-                return stack.isEmpty();
-            }
-
-            @Override
-            public boolean isBaseIngredient(ItemStack stack) {
-                return stack.is(helmet) && !NBTHelper.isModulePresent(module.getTagName(), stack);
-            }
-
-            @Override
-            public boolean isAdditionIngredient(ItemStack stack) {
-                return stack.is(FeederHelmet.FEEDER_HELMET_MODULE_ITEM.get());
-            }
-
-            @Override
-            public boolean matches(Container container, Level level) {
-                return isTemplateIngredient(container.getItem(0)) && isBaseIngredient(container.getItem(1)) && isAdditionIngredient(container.getItem(2));
-            }
-
-            @Override
-            public ItemStack assemble(Container container, RegistryAccess access) {
-                ItemStack assembled = this.getResultItem(access).copy();
-                // copy old nbt to new stack
-                assembled.getOrCreateTag().merge(container.getItem(1).getOrCreateTag());
-                // set module flag
-                NBTHelper.addModule(module.getTagName(), assembled);
-                return assembled;
-            }
-
-            @Override
-            public ItemStack getResultItem(RegistryAccess access) {
-                return outputStack;
-            }
-
-            @Override
-            public ResourceLocation getId() {
-                return craftingId;
-            }
-
-            @Override
-            public RecipeSerializer<?> getSerializer() {
-                return RecipeSerializer.SMITHING_TRANSFORM;
-            }
-        };
+        return new RecipeModuleAddition(helmet, module.getTagName(), craftingId, outputStack);
     }
 
     public static Recipe<?> removalRecipe(final IHelmetModule module, final Item helmet, final ResourceLocation craftingId){

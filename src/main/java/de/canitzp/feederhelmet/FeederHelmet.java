@@ -2,8 +2,8 @@ package de.canitzp.feederhelmet;
 
 import de.canitzp.feederhelmet.item.ItemFeederModule;
 import de.canitzp.feederhelmet.item.ItemPhotosynthesisModule;
+import de.canitzp.feederhelmet.recipe.RecipeModuleAddition;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -12,7 +12,6 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -51,13 +50,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Mod(FeederHelmet.MODID)
 public class FeederHelmet{
     
-    public static final String MODID = "feederhelmet";
+    public static final java.lang.String MODID = "feederhelmet";
     
     private static final Logger LOGGER = LogManager.getLogger(FeederHelmet.MODID);
 
     public static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
     public static final RegistryObject<CreativeModeTab> TAB = TABS.register("tab", FeederTab::create);
-    
+
+    public static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZER = DeferredRegister.create(Registries.RECIPE_SERIALIZER, MODID);
+    public static final RegistryObject<RecipeSerializer<RecipeModuleAddition>> MODULE_ADDITION_SERIALIZER = RECIPE_SERIALIZER.register("module_addition", RecipeModuleAddition.Serializer::new);
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
     public static final RegistryObject<ItemFeederModule> FEEDER_HELMET_MODULE_ITEM = ITEMS.register("feeder_helmet_module", ItemFeederModule::new);
     public static final RegistryObject<ItemPhotosynthesisModule> PHOTOSYNTHESIS_MODULE_ITEM = ITEMS.register("photosynthesis_helmet_module", ItemPhotosynthesisModule::new);
@@ -71,6 +72,7 @@ public class FeederHelmet{
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, FeederConfig.spec);
 
         TABS.register(FMLJavaModLoadingContext.get().getModEventBus());
+        RECIPE_SERIALIZER.register(FMLJavaModLoadingContext.get().getModEventBus());
         ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
         LOGGER.info("Feeder Helmet loaded.");
     }

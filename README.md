@@ -3,7 +3,7 @@
 
 ### Support:
 - 1.20.1 - normal updates
-- 1.20 - Bugfix only
+- 1.20 - unsupported
 - 1.19.4 - Bugfix only
 - 1.19.3 - unsupported
 - 1.19.2 - Bugfix only
