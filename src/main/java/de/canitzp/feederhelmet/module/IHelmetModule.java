@@ -1,4 +1,4 @@
-package de.canitzp.feederhelmet;
+package de.canitzp.feederhelmet.module;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;

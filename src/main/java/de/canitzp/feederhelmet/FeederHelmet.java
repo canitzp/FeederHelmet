@@ -2,6 +2,10 @@ package de.canitzp.feederhelmet;
 
 import de.canitzp.feederhelmet.item.ItemFeederModule;
 import de.canitzp.feederhelmet.item.ItemPhotosynthesisModule;
+import de.canitzp.feederhelmet.module.FeederModule;
+import de.canitzp.feederhelmet.module.IHelmetModule;
+import de.canitzp.feederhelmet.module.PhotosynthesisModule;
+import de.canitzp.feederhelmet.recipe.FeederRecipeManager;
 import de.canitzp.feederhelmet.recipe.RecipeModuleAddition;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.registries.Registries;
@@ -9,7 +13,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ArmorItem;
@@ -52,7 +55,7 @@ public class FeederHelmet{
     
     public static final java.lang.String MODID = "feederhelmet";
     
-    private static final Logger LOGGER = LogManager.getLogger(FeederHelmet.MODID);
+    public static final Logger LOGGER = LogManager.getLogger(FeederHelmet.MODID);
 
     public static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
     public static final RegistryObject<CreativeModeTab> TAB = TABS.register("tab", FeederTab::create);
@@ -68,6 +71,7 @@ public class FeederHelmet{
     public FeederHelmet() {
         LOGGER.info("Feeder Helmet loading...");
         MODULES.add(new FeederModule());
+        MODULES.add(new PhotosynthesisModule());
 
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, FeederConfig.spec);
 
@@ -96,48 +100,7 @@ public class FeederHelmet{
             return;
         }
         if(levelAccessor instanceof Level level){
-            if(level.dimension() != Level.OVERWORLD){
-                return;
-            }
-            LOGGER.info("Feeder Helmet recipe injecting...");
-            RecipeManager recipeManager = level.getRecipeManager();
-    
-            // list which the old recipes are replaced with. This should include all existing recipes and the new ones, before recipeManager#replaceRecipes is called!
-            List<Recipe<?>> allNewRecipes = new ArrayList<>();
-            for(IHelmetModule module : MODULES){
-                for(Item helmet : ForgeRegistries.ITEMS.getValues()){
-                    if(module.isModuleApplicableTo(helmet.getDefaultInstance())){
-                        ResourceLocation helmetKey = ForgeRegistries.ITEMS.getKey(helmet);
-                        // create recipe id for creation recipe
-                        ResourceLocation creationCraftingId = new ResourceLocation(MODID, module.getTagName() + "_creation_" + helmetKey.getNamespace() + "_" + helmetKey.getPath());
-                        // create recipe id for removal recipe
-                        ResourceLocation removalCraftingId = new ResourceLocation(MODID, module.getTagName() + "_removal_" + helmetKey.getNamespace() + "_" + helmetKey.getPath());
-                        // create recipe for creation
-                        Recipe<?> creationRecipe = FeederRecipeManager.creationRecipe(module, helmet, creationCraftingId);
-                        // create recipe for removal
-                        Recipe<?> removalRecipe = FeederRecipeManager.removalRecipe(module, helmet, removalCraftingId);
-
-                        // add creation recipe to recipes list
-                        if(recipeManager.getRecipeIds().noneMatch(resourceLocation -> resourceLocation.equals(creationCraftingId))){
-                            allNewRecipes.add(creationRecipe);
-                            LOGGER.info(String.format("Feeder Helmet created %s recipe for %s with id '%s'", module.getTagName(), helmetKey, creationCraftingId));
-                        }
-                        // add removal recipe to recipes list
-                        if(recipeManager.getRecipeIds().noneMatch(resourceLocation -> resourceLocation.equals(removalCraftingId))){
-                            allNewRecipes.add(removalRecipe);
-                            LOGGER.info(String.format("Feeder Helmet created %s recipe for %s with id '%s'", module.getTagName(), helmetKey, removalCraftingId));
-                        }
-                    }
-                }
-            }
-            
-            try{
-                // add all existing recipes, since we're gonna replace them
-                allNewRecipes.addAll(recipeManager.getRecipes());
-                recipeManager.replaceRecipes(allNewRecipes);
-            } catch(IllegalStateException e){
-                LOGGER.error("Feeder Helmet: Illegal recipe replacement caught! Report this to author immediately!", e);
-            }
+            FeederRecipeManager.injectRecipes(level);
         }
     }
     

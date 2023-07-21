@@ -1,5 +1,9 @@
-package de.canitzp.feederhelmet;
+package de.canitzp.feederhelmet.module;
 
+import de.canitzp.feederhelmet.EnergyHandler;
+import de.canitzp.feederhelmet.FeederConfig;
+import de.canitzp.feederhelmet.FeederHelmet;
+import de.canitzp.feederhelmet.ItemStackUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
