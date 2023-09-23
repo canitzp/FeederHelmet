@@ -1,3 +1,6 @@
+47.1.0:
+- Custom JEI integration and new description text for the feeder module (Fixes #35)
+
 47.0.1:
 - Fixed a major bug, where a client can't join any server due to recipe packets not being handled correct (Fixes #34)
 

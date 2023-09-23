@@ -1,10 +1,9 @@
 # The name of the mod loader type to load - for regular FML @Mod mods it should be javafml
-modLoader="javafml" #mandatory
+modLoader="${mod_loader}" #mandatory
 # A version range to match for said mod loader - for regular FML @Mod it will be the forge version
-loaderVersion="[47,)" #mandatory (32 is current forge version)
+loaderVersion="${loader_version}" #mandatory
 # The license for you mod. This is mandatory metadata and allows for easier comprehension of your redistributive properties.
-# Review your options at https://choosealicense.com/. All rights reserved is the default copyright stance, and is thus the default here.
-license="LGPLv3"
+license="${license}"
 # A URL to refer people to when problems occur with this mod
 issueTrackerURL="https://github.com/canitzp/FeederHelmet/issues" #optional
 # If the mods defined in this file should show as separate resource packs
@@ -12,7 +11,7 @@ showAsResourcePack=false
 # A list of mods - how many allowed here is determined by the individual mod loader
 [[mods]] #mandatory
 # The modid of the mod
-modId="feederhelmet" #mandatory
+modId="${mod_id}" #mandatory
 # The version number of the mod - there's a few well known ${} variables useable here or just hardcode it
 version="${mod_version}" #mandatory
  # A display name for the mod
@@ -36,7 +35,7 @@ description='''AutoFeederHelmet adds the ability to helmets to feed you whenever
     # Does this dependency have to exist - if not, ordering below must be specified
     mandatory=true #mandatory
     # The version range of the dependency
-    versionRange="[47.0.0,)" #mandatory
+    versionRange="${loader_version}" #mandatory
     # An ordering relationship for the dependency - BEFORE or AFTER required if the relationship is not mandatory
     ordering="NONE"
     # Side this dependency is applied on - BOTH, CLIENT or SERVER

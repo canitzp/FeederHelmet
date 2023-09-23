@@ -76,6 +76,14 @@ public class RecipeModuleAddition implements SmithingRecipe {
         return FeederHelmet.MODULE_ADDITION_SERIALIZER.get();
     }
 
+    public Item getBase() {
+        return this.helmet;
+    }
+
+    public ItemStack getOutputStack() {
+        return this.outputStack;
+    }
+
     public static class Serializer implements RecipeSerializer<RecipeModuleAddition> {
 
         @Override

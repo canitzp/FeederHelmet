@@ -1,6 +1,6 @@
 package de.canitzp.feederhelmet.item;
 
-import de.canitzp.feederhelmet.FeederHelmet;
+import de.canitzp.feederhelmet.data.localization.FHLocalizationKeys;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -24,6 +24,6 @@ public class ItemFeederModule extends Item {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
         super.appendHoverText(stack, worldIn, tooltip, flagIn);
-        tooltip.add(Component.translatable("item.feederhelmet:feeder_helmet_module.desc").setStyle(Style.EMPTY.applyFormats(ChatFormatting.GRAY)));
+        tooltip.add(Component.translatable(FHLocalizationKeys.MODULE_FEEDING_DESCRIPTION).setStyle(Style.EMPTY.applyFormats(ChatFormatting.GRAY)));
     }
 }

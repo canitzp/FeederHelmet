@@ -8,3 +8,4 @@ run/
 run_server/
 runs_server/
 logs/
+src/generated/

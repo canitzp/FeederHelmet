@@ -4,6 +4,7 @@ import de.canitzp.feederhelmet.EnergyHandler;
 import de.canitzp.feederhelmet.FeederConfig;
 import de.canitzp.feederhelmet.FeederHelmet;
 import de.canitzp.feederhelmet.ItemStackUtil;
+import de.canitzp.feederhelmet.data.localization.FHLocalizationKeys;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
@@ -38,7 +39,7 @@ public class FeederModule implements IHelmetModule{
     
     @Override
     public void renderTooltip(@Nonnull ItemStack stack, @Nullable Player entityPlayer, List<Component> list, TooltipFlag flags){
-        list.add(Component.translatable("item.feederhelmet:feeder_helmet_module_installed.text").withStyle(ChatFormatting.YELLOW, ChatFormatting.ITALIC));
+        list.add(Component.translatable(FHLocalizationKeys.MODULE_FEEDING_INSTALLED).withStyle(ChatFormatting.YELLOW, ChatFormatting.ITALIC));
     }
     
     @Override

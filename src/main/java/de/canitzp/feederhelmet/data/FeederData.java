@@ -1,6 +1,7 @@
 package de.canitzp.feederhelmet.data;
 
 import de.canitzp.feederhelmet.FeederHelmet;
+import de.canitzp.feederhelmet.data.localization.FHLocalizationUSEnglish;
 import net.minecraft.data.DataGenerator;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.data.event.GatherDataEvent;
@@ -15,9 +16,10 @@ public class FeederData {
         DataGenerator generator = event.getGenerator();
         ExistingFileHelper helper = event.getExistingFileHelper();
 
-        if(event.includeClient()){
-            generator.addProvider(true, new FHItemModel(generator, helper));
-        }
+        generator.addProvider(event.includeClient(), new FHItemModel(generator, helper));
+        generator.addProvider(event.includeClient(), new FHLocalizationUSEnglish(generator.getPackOutput()));
+
+        generator.addProvider(event.includeServer(), new FHRecipeProvider(generator.getPackOutput()));
     }
 
 }

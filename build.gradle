@@ -85,6 +85,10 @@ dependencies {
 // See https://docs.gradle.org/current/dsl/org.gradle.language.jvm.tasks.ProcessResources.html
 def resourceTargets = ['META-INF/mods.toml']
 def replaceProperties = [
+        mod_loader: "javafml",
+        loader_version: "${project.valid_forge_versions}",
+        license: "${project.license}",
+        mod_id: "${project.mod_id}",
         mod_version: "${project.mod_version}"
 ]
 processResources {
@@ -99,11 +103,11 @@ processResources {
 jar {
     manifest {
         attributes([
-                "Specification-Title": project.mod_name,
+                "Specification-Title": "${project.mod_name}",
                 "Specification-Vendor": "canitzp",
                 "Specification-Version": "1",
-                "Implementation-Title": project.name,
-                "Implementation-Version": "${version}",
+                "Implementation-Title": "${project.mod_name}",
+                "Implementation-Version": "${project.mod_version}",
                 "Implementation-Vendor" :"canitzp",
                 "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])

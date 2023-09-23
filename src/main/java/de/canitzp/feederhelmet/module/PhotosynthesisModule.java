@@ -1,6 +1,7 @@
 package de.canitzp.feederhelmet.module;
 
 import de.canitzp.feederhelmet.FeederHelmet;
+import de.canitzp.feederhelmet.data.localization.FHLocalizationKeys;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
@@ -26,12 +27,12 @@ public class PhotosynthesisModule implements IHelmetModule {
 
     @Override
     public boolean isModuleApplicableTo(ItemStack stack) {
-        return FeederHelmet.isItemHelmet(stack);
+        return false; //FeederHelmet.isItemHelmet(stack); disabled because WIP
     }
 
     @Override
     public void renderTooltip(@NotNull ItemStack stack, @Nullable Player entityPlayer, List<Component> list, TooltipFlag flags) {
-        list.add(Component.translatable("item.feederhelmet:photosynthesis_module_installed.text").withStyle(ChatFormatting.GREEN, ChatFormatting.ITALIC));
+        list.add(Component.translatable(FHLocalizationKeys.MODULE_PHOTOSYNTHESIS_INSTALLED).withStyle(ChatFormatting.GREEN, ChatFormatting.ITALIC));
     }
 
     @Override

@@ -1,5 +1,6 @@
 package de.canitzp.feederhelmet;
 
+import de.canitzp.feederhelmet.data.localization.FHLocalizationKeys;
 import de.canitzp.feederhelmet.module.IHelmetModule;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -19,7 +20,7 @@ public class FeederTab {
     public static CreativeModeTab create() {
         return CreativeModeTab.builder()
                 .icon(() -> FEEDER_HELMET_MODULE_ITEM.get().getDefaultInstance())
-                .title(Component.translatable("tab.feederhelmet:general"))
+                .title(Component.translatable(FHLocalizationKeys.TAB))
                 .displayItems((parameters, output) -> {
                     for (IHelmetModule module : MODULES) {
                         output.accept(new ItemStack(module.getCorrespondingModuleItem()));
