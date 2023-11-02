@@ -2,7 +2,8 @@
 ## Keeping you saturated!
 
 ### Support:
-- 1.20.1 - normal updates
+- 1.20.2 - normal updates
+- 1.20.1 - Bugfix only
 - 1.20 - unsupported
 - 1.19.4 - Bugfix only
 - 1.19.3 - unsupported
@@ -11,6 +12,8 @@
 - 1.17.x - unsupported
 - 1.16.x - unsupported
 - 1.12.x - unsupported
+
+Since 1.20.2, NeoForge is the supported modloader.
 
 ### About
 Auto Feeder Helmet is a Minecraft mod since version 1.12.2 that adds a simple way off staying saturated.

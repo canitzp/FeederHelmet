@@ -4,11 +4,11 @@ import de.canitzp.feederhelmet.FeederHelmet;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.client.model.generators.ItemModelProvider;
-import net.minecraftforge.common.data.ExistingFileHelper;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.client.model.generators.ItemModelProvider;
+import net.neoforged.neoforge.common.data.ExistingFileHelper;
+import net.neoforged.neoforge.registries.ForgeRegistries;
 
-public class FHItemModel extends ItemModelProvider {
+public class FHItemModel extends ItemModelProvider{
 
     public FHItemModel(DataGenerator generator, ExistingFileHelper existingFileHelper) {
         super(generator.getPackOutput(), FeederHelmet.MODID, existingFileHelper);

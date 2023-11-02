@@ -1,7 +1,7 @@
 # The name of the mod loader type to load - for regular FML @Mod mods it should be javafml
 modLoader="${mod_loader}" #mandatory
 # A version range to match for said mod loader - for regular FML @Mod it will be the forge version
-loaderVersion="${loader_version}" #mandatory
+loaderVersion="[1,)" #mandatory
 # The license for you mod. This is mandatory metadata and allows for easier comprehension of your redistributive properties.
 license="${license}"
 # A URL to refer people to when problems occur with this mod
@@ -31,7 +31,7 @@ description='''AutoFeederHelmet adds the ability to helmets to feed you whenever
 # A dependency - use the . to indicate dependency for a specific modid. Dependencies are optional.
 [[dependencies.feederhelmet]] #optional
     # the modid of the dependency
-    modId="forge" #mandatory
+    modId="neoforge" #mandatory
     # Does this dependency have to exist - if not, ordering below must be specified
     mandatory=true #mandatory
     # The version range of the dependency

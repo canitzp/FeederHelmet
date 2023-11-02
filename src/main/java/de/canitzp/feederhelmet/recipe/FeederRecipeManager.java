@@ -12,7 +12,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.registries.ForgeRegistries;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +27,7 @@ public class FeederRecipeManager {
         RecipeManager recipeManager = level.getRecipeManager();
 
         // list which the old recipes are replaced with. This should include all existing recipes and the new ones, before recipeManager#replaceRecipes is called!
-        List<Recipe<?>> allNewRecipes = new ArrayList<>();
+        List<RecipeHolder<?>> allNewRecipes = new ArrayList<>();
         for(IHelmetModule module : FeederHelmet.MODULES){
             for(Item helmet : ForgeRegistries.ITEMS.getValues()){
                 if(module.isModuleApplicableTo(helmet.getDefaultInstance())){
@@ -37,18 +37,18 @@ public class FeederRecipeManager {
                     // create recipe id for removal recipe
                     ResourceLocation removalCraftingId = new ResourceLocation(FeederHelmet.MODID, module.getTagName() + "_removal_" + helmetKey.getNamespace() + "_" + helmetKey.getPath());
                     // create recipe for creation
-                    Recipe<?> creationRecipe = FeederRecipeManager.creationRecipe(module, helmet, creationCraftingId);
+                    Recipe<?> creationRecipe = FeederRecipeManager.creationRecipe(module, helmet);
                     // create recipe for removal
-                    Recipe<?> removalRecipe = FeederRecipeManager.removalRecipe(module, helmet, removalCraftingId);
+                    Recipe<?> removalRecipe = FeederRecipeManager.removalRecipe(module, helmet);
 
                     // add creation recipe to recipes list
                     if(recipeManager.getRecipeIds().noneMatch(resourceLocation -> resourceLocation.equals(creationCraftingId))){
-                        allNewRecipes.add(creationRecipe);
+                        allNewRecipes.add(new RecipeHolder<>(creationCraftingId, creationRecipe));
                         FeederHelmet.LOGGER.info(String.format("Feeder Helmet created %s recipe for %s with id '%s'", module.getTagName(), helmetKey, creationCraftingId));
                     }
                     // add removal recipe to recipes list
                     if(recipeManager.getRecipeIds().noneMatch(resourceLocation -> resourceLocation.equals(removalCraftingId))){
-                        allNewRecipes.add(removalRecipe);
+                        allNewRecipes.add(new RecipeHolder<>(removalCraftingId, removalRecipe));
                         FeederHelmet.LOGGER.info(String.format("Feeder Helmet created %s recipe for %s with id '%s'", module.getTagName(), helmetKey, removalCraftingId));
                     }
                 }
@@ -64,18 +64,18 @@ public class FeederRecipeManager {
         }
     }
 
-    public static Recipe<?> creationRecipe(final IHelmetModule module, final Item helmet, final ResourceLocation craftingId){
+    public static Recipe<?> creationRecipe(final IHelmetModule module, final Item helmet){
         ItemStack outputStack = helmet.getDefaultInstance();
         NBTHelper.addModule(module.getTagName(), outputStack);
 
-        return new RecipeModuleAddition(helmet, module.getTagName(), craftingId, outputStack);
+        return new RecipeModuleAddition(helmet, module.getTagName(), outputStack);
     }
 
-    public static Recipe<?> removalRecipe(final IHelmetModule module, final Item helmet, final ResourceLocation craftingId){
+    public static Recipe<?> removalRecipe(final IHelmetModule module, final Item helmet){
         NonNullList<Ingredient> ingredients = NonNullList.create();
         ingredients.add(Ingredient.of(helmet));
         ItemStack outputStack = helmet.getDefaultInstance();
-        return new ShapelessRecipe(craftingId, "", CraftingBookCategory.EQUIPMENT, outputStack, ingredients){
+        return new ShapelessRecipe("", CraftingBookCategory.EQUIPMENT, outputStack, ingredients){
             // copy nbt tag from helmet to new helmet, also delete SolarHelmet tag
             @Override
             public ItemStack assemble(CraftingContainer container, RegistryAccess access) {

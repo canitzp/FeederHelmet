@@ -2,9 +2,9 @@ package de.canitzp.feederhelmet.data.localization;
 
 import de.canitzp.feederhelmet.FeederHelmet;
 import net.minecraft.data.PackOutput;
-import net.minecraftforge.common.data.LanguageProvider;
+import net.neoforged.neoforge.common.data.LanguageProvider;
 
-public class FHLocalizationUSEnglish extends LanguageProvider {
+public class FHLocalizationUSEnglish extends LanguageProvider{
 
     public FHLocalizationUSEnglish(PackOutput output) {
         super(output, FeederHelmet.MODID, "en_us");

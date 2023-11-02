@@ -1,34 +1,35 @@
 package de.canitzp.feederhelmet;
 
 import com.google.common.collect.Lists;
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.common.NeoForgeConfig;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class FeederConfig {
     
-    private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
+    private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
     public static final General GENERAL = new General(BUILDER);
     public static final PhotosynthesisModule PHOTOSYNTHESIS_MODULE = new PhotosynthesisModule(BUILDER);
-    public static final ForgeConfigSpec spec = BUILDER.build();
+    public static final ModConfigSpec spec = BUILDER.build();
 
     // todo reorganize when breaking change
     public static class General {
-        public final ForgeConfigSpec.ConfigValue<Integer> DURABILITY;
-        public final ForgeConfigSpec.ConfigValue<Integer> ENERGY_CONSUMPTION;
-        public final ForgeConfigSpec.ConfigValue<Integer> WAIT_TICKS;
-        public final ForgeConfigSpec.ConfigValue<Boolean> CAN_BREAK;
-        public final ForgeConfigSpec.ConfigValue<Boolean> WAIT_UNITL_FILL_ALL_HUNGER;
-        public final ForgeConfigSpec.ConfigValue<Boolean> IGNORE_WAITING_WHEN_LOW_HEART;
-        public final ForgeConfigSpec.ConfigValue<Boolean> BLACKLIST_SMELTABLES;
-        public final ForgeConfigSpec.ConfigValue<List<String>> HELMET_BLACKLIST;
-        public final ForgeConfigSpec.ConfigValue<List<String>> HELMET_WHITELIST;
-        public final ForgeConfigSpec.ConfigValue<List<String>> FOOD_BLACKLIST;
-        public final ForgeConfigSpec.ConfigValue<List<String>> FOOD_WHITELIST;
-        public final ForgeConfigSpec.ConfigValue<Boolean> FOOD_WHITELIST_ONLY;
+        public final ModConfigSpec.ConfigValue<Integer> DURABILITY;
+        public final ModConfigSpec.ConfigValue<Integer> ENERGY_CONSUMPTION;
+        public final ModConfigSpec.ConfigValue<Integer> WAIT_TICKS;
+        public final ModConfigSpec.ConfigValue<Boolean> CAN_BREAK;
+        public final ModConfigSpec.ConfigValue<Boolean> WAIT_UNITL_FILL_ALL_HUNGER;
+        public final ModConfigSpec.ConfigValue<Boolean> IGNORE_WAITING_WHEN_LOW_HEART;
+        public final ModConfigSpec.ConfigValue<Boolean> BLACKLIST_SMELTABLES;
+        public final ModConfigSpec.ConfigValue<List<String>> HELMET_BLACKLIST;
+        public final ModConfigSpec.ConfigValue<List<String>> HELMET_WHITELIST;
+        public final ModConfigSpec.ConfigValue<List<String>> FOOD_BLACKLIST;
+        public final ModConfigSpec.ConfigValue<List<String>> FOOD_WHITELIST;
+        public final ModConfigSpec.ConfigValue<Boolean> FOOD_WHITELIST_ONLY;
     
-        public General(ForgeConfigSpec.Builder builder) {
+        public General(ModConfigSpec.Builder builder) {
             builder.push("General");
             DURABILITY = builder
                 .comment("How much durability should the helmet use for every food eaten, when it is a unpowered helmet.")
@@ -88,7 +89,7 @@ public class FeederConfig {
     }
     
     public static class PhotosynthesisModule {
-        public PhotosynthesisModule(ForgeConfigSpec.Builder builder) {
+        public PhotosynthesisModule(ModConfigSpec.Builder builder) {
         
         }
     }

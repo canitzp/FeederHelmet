@@ -1,6 +1,8 @@
 package de.canitzp.feederhelmet.recipe;
 
 import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.canitzp.feederhelmet.FeederHelmet;
 import de.canitzp.feederhelmet.NBTHelper;
 import net.minecraft.core.RegistryAccess;
@@ -14,20 +16,19 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.item.crafting.SmithingRecipe;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.registries.ForgeRegistries;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class RecipeModuleAddition implements SmithingRecipe {
 
     private final Item helmet;
     private final String module;
-    private final ResourceLocation craftingId;
     private final ItemStack outputStack;
 
-    public RecipeModuleAddition(Item helmet, String module, ResourceLocation craftingId, ItemStack outputStack) {
+    public RecipeModuleAddition(Item helmet, String module, ItemStack outputStack) {
         this.helmet = helmet;
         this.module = module;
-        this.craftingId = craftingId;
         this.outputStack = outputStack;
     }
 
@@ -67,11 +68,6 @@ public class RecipeModuleAddition implements SmithingRecipe {
     }
 
     @Override
-    public ResourceLocation getId() {
-        return craftingId;
-    }
-
-    @Override
     public RecipeSerializer<?> getSerializer() {
         return FeederHelmet.MODULE_ADDITION_SERIALIZER.get();
     }
@@ -87,21 +83,23 @@ public class RecipeModuleAddition implements SmithingRecipe {
     public static class Serializer implements RecipeSerializer<RecipeModuleAddition> {
 
         @Override
-        public RecipeModuleAddition fromJson(ResourceLocation craftingId, JsonObject json) {
-            Item helmet = ForgeRegistries.ITEMS.getValue(new ResourceLocation(GsonHelper.getNonNull(json, "helmet").getAsString()));
-            String module = GsonHelper.getNonNull(json, "module").getAsString();
-            ItemStack output = ShapedRecipe.itemStackFromJson(GsonHelper.getAsJsonObject(json, "result"));
-            return new RecipeModuleAddition(helmet, module, craftingId, output);
-        }
-
-        @Override
-        public @Nullable RecipeModuleAddition fromNetwork(ResourceLocation craftingId, FriendlyByteBuf buffer) {
+        public @Nullable RecipeModuleAddition fromNetwork(FriendlyByteBuf buffer) {
             Item helmet = ForgeRegistries.ITEMS.getValue(buffer.readResourceLocation());
             String module = buffer.readUtf();
             ItemStack outputStack = buffer.readItem();
-            return new RecipeModuleAddition(helmet, module, craftingId, outputStack);
+            return new RecipeModuleAddition(helmet, module, outputStack);
         }
-
+    
+        @Override
+        public @NotNull Codec<RecipeModuleAddition> codec(){
+            return RecordCodecBuilder.create(
+                codec -> codec.group(
+                ResourceLocation.CODEC.fieldOf("helmet").forGetter(recipe -> ForgeRegistries.ITEMS.getKey(recipe.helmet)),
+                Codec.STRING.fieldOf("module").forGetter(recipe -> recipe.module),
+                ItemStack.CODEC.fieldOf("result").forGetter(recipe -> recipe.outputStack)
+            ).apply(codec, (helmetResourceLocation, module, result) -> new RecipeModuleAddition(ForgeRegistries.ITEMS.getValue(helmetResourceLocation), module, result)));
+        }
+    
         @Override
         public void toNetwork(FriendlyByteBuf buffer, RecipeModuleAddition recipe) {
             buffer.writeResourceLocation(ForgeRegistries.ITEMS.getKey(recipe.helmet));

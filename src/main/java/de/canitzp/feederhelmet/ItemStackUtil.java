@@ -3,7 +3,7 @@ package de.canitzp.feederhelmet;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.registries.ForgeRegistries;
 
 public class ItemStackUtil {
 
@@ -20,7 +20,7 @@ public class ItemStackUtil {
     }
     
     public static boolean isSmeltable(Level level, ItemStack stack){
-        return level.getRecipeManager().getAllRecipesFor(RecipeType.SMELTING).stream().anyMatch(furnaceRecipe -> furnaceRecipe.getIngredients().stream().anyMatch(ingredient -> ingredient.test(stack)));
+        return level.getRecipeManager().getAllRecipesFor(RecipeType.SMELTING).stream().anyMatch(furnaceRecipe -> furnaceRecipe.value().getIngredients().stream().anyMatch(ingredient -> ingredient.test(stack)));
     }
     
     public static boolean isEatable(ItemStack stack){

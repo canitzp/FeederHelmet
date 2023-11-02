@@ -12,8 +12,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.event.ForgeEventFactory;
+import net.neoforged.neoforge.common.capabilities.Capabilities;
+import net.neoforged.neoforge.event.EventHooks;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -44,14 +44,14 @@ public class FeederModule implements IHelmetModule{
     
     @Override
     public void updatePlayer(Player player, ItemStack helmetStack){
-        if(player.canEat(false) && FeederHelmet.canDamageBeReducedOrEnergyConsumed(helmetStack)){
+        if(!player.getAbilities().invulnerable && player.canEat(false) && FeederHelmet.canDamageBeReducedOrEnergyConsumed(helmetStack)){
             for(ItemStack inventoryStack : player.getInventory().items){
                 if(!FeederModule.canHelmetEatStack(player.level(), inventoryStack) || !FeederModule.canPlayerEat(player, inventoryStack) || !player.canEat(false)){
                     continue;
                 }
                 AtomicBoolean hasEnergy = new AtomicBoolean(false);
                 AtomicBoolean canEat = new AtomicBoolean(false);
-                helmetStack.getCapability(ForgeCapabilities.ENERGY).ifPresent(energy -> {
+                helmetStack.getCapability(Capabilities.ENERGY).ifPresent(energy -> {
                     hasEnergy.set(true);
                     EnergyHandler energyHandler = EnergyHandler.get(helmetStack);
                     if(energyHandler != null){
@@ -72,9 +72,9 @@ public class FeederModule implements IHelmetModule{
                     canEat.set(true);
                 }
                 if(canEat.get()){
-                    ForgeEventFactory.onItemUseStart(player, inventoryStack, 0);
+                    EventHooks.onItemUseStart(player, inventoryStack, 0);
                     ItemStack result = inventoryStack.getItem().finishUsingItem(inventoryStack, player.getCommandSenderWorld(), player);
-                    ForgeEventFactory.onItemUseFinish(player, inventoryStack, 0, result);
+                    EventHooks.onItemUseFinish(player, inventoryStack, 0, result);
                     break;
                 }
             }
@@ -102,7 +102,7 @@ public class FeederModule implements IHelmetModule{
     private static boolean canPlayerEat(Player player, ItemStack stack){
         if(!stack.isEmpty() && stack.getItem().isEdible()){
             if(FeederConfig.GENERAL.WAIT_UNITL_FILL_ALL_HUNGER.get()){
-                return player.getFoodData().getFoodLevel() + stack.getItem().getFoodProperties().getNutrition() <= 20 || (FeederConfig.GENERAL.IGNORE_WAITING_WHEN_LOW_HEART.get() && player.getHealth() <= 10.0F);
+                return player.getFoodData().getFoodLevel() + stack.getItem().getFoodProperties(stack, player).getNutrition() <= 20 || (FeederConfig.GENERAL.IGNORE_WAITING_WHEN_LOW_HEART.get() && player.getHealth() <= 10.0F);
             }
             return true;
         }

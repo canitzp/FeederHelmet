@@ -7,5 +7,7 @@ classes/
 run/
 run_server/
 runs_server/
+run_data/
+run_gametest/
 logs/
 src/generated/
