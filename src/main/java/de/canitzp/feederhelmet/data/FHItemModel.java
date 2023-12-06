@@ -1,12 +1,12 @@
 package de.canitzp.feederhelmet.data;
 
 import de.canitzp.feederhelmet.FeederHelmet;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.neoforged.neoforge.client.model.generators.ItemModelProvider;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
-import net.neoforged.neoforge.registries.ForgeRegistries;
 
 public class FHItemModel extends ItemModelProvider{
 
@@ -21,7 +21,7 @@ public class FHItemModel extends ItemModelProvider{
     }
 
     private void singleTexture(Item item){
-        ResourceLocation key = ForgeRegistries.ITEMS.getKey(item);
+        ResourceLocation key = BuiltInRegistries.ITEM.getKey(item);
         singleTexture(key.getPath(), mcLoc("item/handheld"), "layer0", modLoc("item/" + key.getPath()));
     }
 }

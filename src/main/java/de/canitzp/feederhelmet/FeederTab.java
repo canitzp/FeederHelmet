@@ -2,6 +2,7 @@ package de.canitzp.feederhelmet;
 
 import de.canitzp.feederhelmet.data.localization.FHLocalizationKeys;
 import de.canitzp.feederhelmet.module.IHelmetModule;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -9,8 +10,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.neoforge.registries.ForgeRegistries;
 
 import static de.canitzp.feederhelmet.FeederHelmet.*;
 
@@ -23,7 +22,7 @@ public class FeederTab {
                 .displayItems((parameters, output) -> {
                     for (IHelmetModule module : MODULES) {
                         output.accept(new ItemStack(module.getCorrespondingModuleItem()));
-                        for (Item item : ForgeRegistries.ITEMS) {
+                        for (Item item : BuiltInRegistries.ITEM) {
                             if (module.isModuleApplicableTo(item.getDefaultInstance())) {
                                 ItemStack stack = new ItemStack(item);
                                 CompoundTag tag = new CompoundTag();

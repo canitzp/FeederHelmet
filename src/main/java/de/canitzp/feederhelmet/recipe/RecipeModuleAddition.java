@@ -1,22 +1,19 @@
 package de.canitzp.feederhelmet.recipe;
 
-import com.google.gson.JsonObject;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.canitzp.feederhelmet.FeederHelmet;
 import de.canitzp.feederhelmet.NBTHelper;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.item.crafting.SmithingRecipe;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -84,7 +81,7 @@ public class RecipeModuleAddition implements SmithingRecipe {
 
         @Override
         public @Nullable RecipeModuleAddition fromNetwork(FriendlyByteBuf buffer) {
-            Item helmet = ForgeRegistries.ITEMS.getValue(buffer.readResourceLocation());
+            Item helmet = BuiltInRegistries.ITEM.get(buffer.readResourceLocation());
             String module = buffer.readUtf();
             ItemStack outputStack = buffer.readItem();
             return new RecipeModuleAddition(helmet, module, outputStack);
@@ -94,15 +91,15 @@ public class RecipeModuleAddition implements SmithingRecipe {
         public @NotNull Codec<RecipeModuleAddition> codec(){
             return RecordCodecBuilder.create(
                 codec -> codec.group(
-                ResourceLocation.CODEC.fieldOf("helmet").forGetter(recipe -> ForgeRegistries.ITEMS.getKey(recipe.helmet)),
+                ResourceLocation.CODEC.fieldOf("helmet").forGetter(recipe -> BuiltInRegistries.ITEM.getKey(recipe.helmet)),
                 Codec.STRING.fieldOf("module").forGetter(recipe -> recipe.module),
                 ItemStack.CODEC.fieldOf("result").forGetter(recipe -> recipe.outputStack)
-            ).apply(codec, (helmetResourceLocation, module, result) -> new RecipeModuleAddition(ForgeRegistries.ITEMS.getValue(helmetResourceLocation), module, result)));
+            ).apply(codec, (helmetResourceLocation, module, result) -> new RecipeModuleAddition(BuiltInRegistries.ITEM.get(helmetResourceLocation), module, result)));
         }
     
         @Override
         public void toNetwork(FriendlyByteBuf buffer, RecipeModuleAddition recipe) {
-            buffer.writeResourceLocation(ForgeRegistries.ITEMS.getKey(recipe.helmet));
+            buffer.writeResourceLocation(BuiltInRegistries.ITEM.getKey(recipe.helmet));
             buffer.writeUtf(recipe.module);
             buffer.writeItemStack(recipe.outputStack, false);
         }

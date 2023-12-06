@@ -5,6 +5,7 @@ import de.canitzp.feederhelmet.module.IHelmetModule;
 import de.canitzp.feederhelmet.NBTHelper;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
@@ -12,7 +13,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.registries.ForgeRegistries;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,9 +29,9 @@ public class FeederRecipeManager {
         // list which the old recipes are replaced with. This should include all existing recipes and the new ones, before recipeManager#replaceRecipes is called!
         List<RecipeHolder<?>> allNewRecipes = new ArrayList<>();
         for(IHelmetModule module : FeederHelmet.MODULES){
-            for(Item helmet : ForgeRegistries.ITEMS.getValues()){
+            for(Item helmet : BuiltInRegistries.ITEM){
                 if(module.isModuleApplicableTo(helmet.getDefaultInstance())){
-                    ResourceLocation helmetKey = ForgeRegistries.ITEMS.getKey(helmet);
+                    ResourceLocation helmetKey = BuiltInRegistries.ITEM.getKey(helmet);
                     // create recipe id for creation recipe
                     ResourceLocation creationCraftingId = new ResourceLocation(FeederHelmet.MODID, module.getTagName() + "_creation_" + helmetKey.getNamespace() + "_" + helmetKey.getPath());
                     // create recipe id for removal recipe

@@ -7,7 +7,9 @@ import de.canitzp.feederhelmet.module.IHelmetModule;
 import de.canitzp.feederhelmet.module.PhotosynthesisModule;
 import de.canitzp.feederhelmet.recipe.FeederRecipeManager;
 import de.canitzp.feederhelmet.recipe.RecipeModuleAddition;
+import net.minecraft.core.Holder;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -37,14 +39,13 @@ import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
-import net.neoforged.neoforge.registries.ForgeRegistries;
-import net.neoforged.neoforge.registries.RegistryObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 
 /**
  * @author canitzp
@@ -58,13 +59,13 @@ public class FeederHelmet{
     public static final Logger LOGGER = LogManager.getLogger(FeederHelmet.MODID);
 
     public static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
-    public static final RegistryObject<CreativeModeTab> TAB = TABS.register("tab", FeederTab::create);
+    public static final Holder<CreativeModeTab> TAB = TABS.register("tab", FeederTab::create);
 
     public static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZER = DeferredRegister.create(Registries.RECIPE_SERIALIZER, MODID);
-    public static final RegistryObject<RecipeSerializer<RecipeModuleAddition>> MODULE_ADDITION_SERIALIZER = RECIPE_SERIALIZER.register("module_addition", RecipeModuleAddition.Serializer::new);
-    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
-    public static final RegistryObject<ItemFeederModule> FEEDER_HELMET_MODULE_ITEM = ITEMS.register("feeder_helmet_module", ItemFeederModule::new);
-    public static final RegistryObject<ItemPhotosynthesisModule> PHOTOSYNTHESIS_MODULE_ITEM = ITEMS.register("photosynthesis_helmet_module", ItemPhotosynthesisModule::new);
+    public static final Supplier<RecipeSerializer<RecipeModuleAddition>> MODULE_ADDITION_SERIALIZER = RECIPE_SERIALIZER.register("module_addition", RecipeModuleAddition.Serializer::new);
+    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(BuiltInRegistries.ITEM, MODID);
+    public static final Supplier<ItemFeederModule> FEEDER_HELMET_MODULE_ITEM = ITEMS.register("feeder_helmet_module", ItemFeederModule::new);
+    public static final Supplier<ItemPhotosynthesisModule> PHOTOSYNTHESIS_MODULE_ITEM = ITEMS.register("photosynthesis_helmet_module", ItemPhotosynthesisModule::new);
     
     public static final List<IHelmetModule> MODULES = new ArrayList<>();
     
