@@ -23,6 +23,13 @@ println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getPro
 
 minecraft.accessTransformers.file rootProject.file('src/main/resources/META-INF/accesstransformer.cfg')
 
+subsystems {
+    parchment {
+        minecraftVersion="${parchment_mc_version}"
+        mappingsVersion="${parchment_mapping_version}"
+    }
+}
+
 runs {
     configureEach {
         //systemProperty 'forge.logging.markers', 'REGISTRIES'

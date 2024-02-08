@@ -32,7 +32,8 @@ import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.neoforged.neoforge.common.capabilities.Capabilities;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.energy.IEnergyStorage;
 import net.neoforged.neoforge.event.TickEvent;
 import net.neoforged.neoforge.event.entity.player.AnvilRepairEvent;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
@@ -162,9 +163,10 @@ public class FeederHelmet{
     public static boolean canDamageBeReducedOrEnergyConsumed(@Nonnull ItemStack stack){
         AtomicBoolean canWork = new AtomicBoolean(false);
         
-        stack.getCapability(Capabilities.ENERGY).ifPresent(energyCapability -> {
+        IEnergyStorage energyCapability = stack.getCapability(Capabilities.EnergyStorage.ITEM);
+        if(energyCapability != null){
             canWork.set(true);
-        });
+        }
         
         if(!canWork.get()){
             if(stack.isDamageableItem()){

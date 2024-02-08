@@ -12,7 +12,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.common.capabilities.Capabilities;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.energy.IEnergyStorage;
 import net.neoforged.neoforge.event.EventHooks;
 
 import javax.annotation.Nonnull;
@@ -51,7 +52,8 @@ public class FeederModule implements IHelmetModule{
                 }
                 AtomicBoolean hasEnergy = new AtomicBoolean(false);
                 AtomicBoolean canEat = new AtomicBoolean(false);
-                helmetStack.getCapability(Capabilities.ENERGY).ifPresent(energy -> {
+                IEnergyStorage capability = helmetStack.getCapability(Capabilities.EnergyStorage.ITEM);
+                if(capability != null){
                     hasEnergy.set(true);
                     EnergyHandler energyHandler = EnergyHandler.get(helmetStack);
                     if(energyHandler != null){
@@ -60,7 +62,7 @@ public class FeederModule implements IHelmetModule{
                             canEat.set(true);
                         }
                     }
-                });
+                }
                 if(!hasEnergy.get()){
                     if(helmetStack.isDamageableItem()){
                         helmetStack.setDamageValue(helmetStack.getDamageValue() + FeederConfig.GENERAL.DURABILITY.get());
