@@ -1,9 +1,12 @@
 package de.canitzp.feederhelmet;
 
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import javax.annotation.Nonnull;
@@ -11,35 +14,39 @@ import javax.annotation.Nonnull;
 public abstract class EnergyHandler {
 
     public static EnergyHandler get(@Nonnull ItemStack stack){
-        if(!stack.hasTag()){
+        if(!stack.has(DataComponents.CUSTOM_DATA)){
             return null;
         }
 
-        if(stack.getTag().contains("Energy", Tag.TAG_INT)){
-            return new Simple(stack, "Energy");
+        CompoundTag tag = stack.get(DataComponents.CUSTOM_DATA).copyTag();
+
+        if(tag.contains("Energy", Tag.TAG_INT)){
+            return new Simple(stack, tag, "Energy");
         }
-        if(stack.getTag().contains("energy", Tag.TAG_INT)){
-            return new Simple(stack, "energy");
+        if(tag.contains("energy", Tag.TAG_INT)){
+            return new Simple(stack, tag, "energy");
         }
-        if(stack.getTag().contains("enderio.darksteel.upgrade.energyUpgrade", Tag.TAG_COMPOUND)){
-            return new EnderIOEnergyUpgrade(stack);
+        if(tag.contains("enderio.darksteel.upgrade.energyUpgrade", Tag.TAG_COMPOUND)){
+            return new EnderIOEnergyUpgrade(stack, tag);
         }
-        if(stack.getTag().contains("mekData", Tag.TAG_COMPOUND)){
-            CompoundTag mekData = stack.getTag().getCompound("mekData");
+        if(tag.contains("mekData", Tag.TAG_COMPOUND)){
+            CompoundTag mekData = tag.getCompound("mekData");
             if(mekData.contains("EnergyContainers", Tag.TAG_LIST)){
-                return new MekanismMekaSuit(stack, mekData.getList("EnergyContainers", Tag.TAG_COMPOUND));
+                return new MekanismMekaSuit(stack, tag, mekData.getList("EnergyContainers", Tag.TAG_COMPOUND));
             }
         }
-        if(stack.getTag().contains("charge", Tag.TAG_DOUBLE)){
-            return new IC2(stack);
+        if(tag.contains("charge", Tag.TAG_DOUBLE)){
+            return new IC2(stack, tag);
         }
         return null;
     }
 
     private ItemStack stack;
+    private CompoundTag tag;
 
-    public EnergyHandler(ItemStack stack) {
+    public EnergyHandler(ItemStack stack, CompoundTag tag) {
         this.stack = stack;
+        this.tag = tag;
     }
 
     public abstract boolean canBeUsed(int energyToExtract);
@@ -51,10 +58,10 @@ public abstract class EnergyHandler {
         private String tagName;
         private int energy, energyAfterUsage;
 
-        public Simple(ItemStack stack, String tagName) {
-            super(stack);
+        public Simple(ItemStack stack, CompoundTag tag, String tagName) {
+            super(stack, tag);
             this.tagName = tagName;
-            this.energy = stack.getTag().getInt(this.tagName);
+            this.energy = tag.getInt(this.tagName);
         }
 
         @Override
@@ -65,7 +72,8 @@ public abstract class EnergyHandler {
 
         @Override
         public void use() {
-            super.stack.getTag().putInt(this.tagName, this.energyAfterUsage);
+            super.tag.putInt(this.tagName, this.energyAfterUsage);
+            super.stack.applyComponents(DataComponentPatch.builder().set(DataComponents.CUSTOM_DATA, CustomData.of(super.tag)).build());
         }
     }
 
@@ -73,9 +81,9 @@ public abstract class EnergyHandler {
 
         private int energy, energyAfterUsage;
 
-        public EnderIOEnergyUpgrade(ItemStack stack) {
-            super(stack);
-            this.energy = stack.getTag().getCompound("enderio.darksteel.upgrade.energyUpgrade").getInt("energy");
+        public EnderIOEnergyUpgrade(ItemStack stack, CompoundTag tag) {
+            super(stack, tag);
+            this.energy = tag.getCompound("enderio.darksteel.upgrade.energyUpgrade").getInt("energy");
         }
 
         @Override
@@ -86,7 +94,8 @@ public abstract class EnergyHandler {
 
         @Override
         public void use() {
-            super.stack.getTag().getCompound("enderio.darksteel.upgrade.energyUpgrade").putInt("energy", this.energyAfterUsage);
+            super.tag.getCompound("enderio.darksteel.upgrade.energyUpgrade").putInt("energy", this.energyAfterUsage);
+            super.stack.applyComponents(DataComponentPatch.builder().set(DataComponents.CUSTOM_DATA, CustomData.of(super.tag)).build());
         }
     }
 
@@ -95,11 +104,11 @@ public abstract class EnergyHandler {
         private ListTag tagEnergyContainers;
         private int energy, energyToExtract;
 
-        public MekanismMekaSuit(ItemStack stack, ListTag tagEnergyContainers) {
-            super(stack);
+        public MekanismMekaSuit(ItemStack stack, CompoundTag tag, ListTag tagEnergyContainers) {
+            super(stack, tag);
             this.tagEnergyContainers = tagEnergyContainers;
-            for (Tag tag : tagEnergyContainers) {
-                if(tag instanceof CompoundTag compound){
+            for (Tag energyContainer : tagEnergyContainers) {
+                if(energyContainer instanceof CompoundTag compound){
                     String storedAsString = compound.getString("stored");
                     if (NumberUtils.isParsable(storedAsString)) {
                         this.energy += NumberUtils.toInt(storedAsString, 0);
@@ -119,8 +128,8 @@ public abstract class EnergyHandler {
         public void use() {
             this.energyToExtract = Math.round(this.energyToExtract * 2.5F); // energy conversion from RF/FE to MJ
             for (Tag energyContainer : this.tagEnergyContainers) {
-                if(energyContainer instanceof CompoundTag tag){
-                    String storedAsString = tag.getString("stored");
+                if(energyContainer instanceof CompoundTag compound){
+                    String storedAsString = compound.getString("stored");
                     int stored = 0;
                     if(NumberUtils.isParsable(storedAsString)){
                         stored = NumberUtils.toInt(storedAsString, 0);
@@ -129,12 +138,13 @@ public abstract class EnergyHandler {
                     int energyAfterExtract = Math.max(0, stored - this.energyToExtract);
                     // calculate how much energy has to be extracted from the next storages
                     this.energyToExtract = stored - energyAfterExtract;
-                    tag.putString("stored", Integer.toString(energyAfterExtract));
+                    compound.putString("stored", Integer.toString(energyAfterExtract));
                     if(this.energyToExtract <= 0){
                         break;
                     }
                 }
             }
+            super.stack.applyComponents(DataComponentPatch.builder().set(DataComponents.CUSTOM_DATA, CustomData.of(super.tag)).build());
         }
     }
 
@@ -144,9 +154,9 @@ public abstract class EnergyHandler {
 
         private double energy, energyAfterUsage;
 
-        public IC2(ItemStack stack) {
-            super(stack);
-            this.energy = stack.getTag().getDouble("charge");
+        public IC2(ItemStack stack, CompoundTag tag) {
+            super(stack, tag);
+            this.energy = tag.getDouble("charge");
         }
 
         @Override
@@ -158,7 +168,8 @@ public abstract class EnergyHandler {
 
         @Override
         public void use() {
-            super.stack.getTag().putDouble("charge", this.energyAfterUsage);
+            super.tag.putDouble("charge", this.energyAfterUsage);
+            super.stack.applyComponents(DataComponentPatch.builder().set(DataComponents.CUSTOM_DATA, CustomData.of(super.tag)).build());
         }
     }
 }

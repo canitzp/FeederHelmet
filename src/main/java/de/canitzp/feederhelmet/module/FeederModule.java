@@ -102,9 +102,9 @@ public class FeederModule implements IHelmetModule{
     }
     
     private static boolean canPlayerEat(Player player, ItemStack stack){
-        if(!stack.isEmpty() && stack.getItem().isEdible()){
+        if(!stack.isEmpty() && ItemStackUtil.isEatable(stack)){
             if(FeederConfig.GENERAL.WAIT_UNITL_FILL_ALL_HUNGER.get()){
-                return player.getFoodData().getFoodLevel() + stack.getItem().getFoodProperties(stack, player).getNutrition() <= 20 || (FeederConfig.GENERAL.IGNORE_WAITING_WHEN_LOW_HEART.get() && player.getHealth() <= 10.0F);
+                return player.getFoodData().getFoodLevel() + stack.getItem().getFoodProperties(stack, player).nutrition() <= 20 || (FeederConfig.GENERAL.IGNORE_WAITING_WHEN_LOW_HEART.get() && player.getHealth() <= 10.0F);
             }
             return true;
         }

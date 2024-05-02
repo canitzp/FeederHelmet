@@ -1,3 +1,8 @@
+206.0.0:
+- Update to 1.20.6
+- Fix stack data is lost on uncrafting helmet
+- Fix wrong module being removed when uncrafting
+
 204.0.0:
 - Update to 1.20.4
 

@@ -1,5 +1,6 @@
 package de.canitzp.feederhelmet;
 
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeType;
@@ -24,7 +25,7 @@ public class ItemStackUtil {
     }
     
     public static boolean isEatable(ItemStack stack){
-        return stack.getItem().isEdible();
+        return stack.has(DataComponents.FOOD);
     }
     
     public static boolean isHelmetBlacklisted(ItemStack stack){

@@ -3,15 +3,13 @@ package de.canitzp.feederhelmet;
 import de.canitzp.feederhelmet.data.localization.FHLocalizationKeys;
 import de.canitzp.feederhelmet.module.IHelmetModule;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
-import static de.canitzp.feederhelmet.FeederHelmet.*;
+import static de.canitzp.feederhelmet.FeederHelmet.FEEDER_HELMET_MODULE_ITEM;
+import static de.canitzp.feederhelmet.FeederHelmet.MODULES;
 
 public class FeederTab {
 
@@ -24,12 +22,8 @@ public class FeederTab {
                         output.accept(new ItemStack(module.getCorrespondingModuleItem()));
                         for (Item item : BuiltInRegistries.ITEM) {
                             if (module.isModuleApplicableTo(item.getDefaultInstance())) {
-                                ItemStack stack = new ItemStack(item);
-                                CompoundTag tag = new CompoundTag();
-                                ListTag modulesList = new ListTag();
-                                modulesList.add(StringTag.valueOf(module.getTagName()));
-                                tag.put("modules", modulesList);
-                                stack.setTag(tag);
+                                ItemStack stack = item.getDefaultInstance();
+                                FeederHelmet.addModule(stack, module.getTagName());
                                 output.accept(stack);
                             }
                         }

@@ -2,11 +2,9 @@ package de.canitzp.feederhelmet.recipe;
 
 import de.canitzp.feederhelmet.FeederHelmet;
 import de.canitzp.feederhelmet.module.IHelmetModule;
-import de.canitzp.feederhelmet.NBTHelper;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.Item;
@@ -66,7 +64,8 @@ public class FeederRecipeManager {
 
     public static Recipe<?> creationRecipe(final IHelmetModule module, final Item helmet){
         ItemStack outputStack = helmet.getDefaultInstance();
-        NBTHelper.addModule(module.getTagName(), outputStack);
+
+        FeederHelmet.addModule(outputStack, module.getTagName());
 
         return new RecipeModuleAddition(helmet, module.getTagName(), outputStack);
     }
@@ -78,7 +77,7 @@ public class FeederRecipeManager {
         return new ShapelessRecipe("", CraftingBookCategory.EQUIPMENT, outputStack, ingredients){
             // copy nbt tag from helmet to new helmet, also delete SolarHelmet tag
             @Override
-            public ItemStack assemble(CraftingContainer container, RegistryAccess access) {
+            public ItemStack assemble(CraftingContainer container, HolderLookup.Provider access) {
                 ItemStack assembled = super.assemble(container, access);
                 ItemStack inputStack = ItemStack.EMPTY;
                 for (int slotId = 0; slotId < container.getContainerSize(); slotId++) {
@@ -88,12 +87,11 @@ public class FeederRecipeManager {
                     }
                 }
                 if(!inputStack.isEmpty()){
-                    if(inputStack.hasTag()){
-                        CompoundTag inputTag = inputStack.getTag();
-                        inputTag.remove("SolarHelmet");
-                        assembled.setTag(inputTag);
-                        NBTHelper.removeModule(module.getTagName(), assembled);
+                    if(inputStack.has(FeederHelmet.DC_MODULES)){
+                        FeederHelmet.removeModule(inputStack, module.getTagName());
                     }
+                    // Copy all components to assembled stack
+                    assembled.applyComponents(inputStack.getComponents());
                 }
                 return assembled;
             }
@@ -115,10 +113,7 @@ public class FeederRecipeManager {
                 if (inputStack.isEmpty()) {
                     return false; // this "should" never happen
                 }
-                if (!inputStack.hasTag()) {
-                    return false;
-                }
-                return NBTHelper.isModulePresent(module.getTagName(), inputStack);
+                return FeederHelmet.hasModule(inputStack, module.getTagName());
             }
 
             @Override
