@@ -1,3 +1,6 @@
+210.0.0:
+- Update to 1.21
+
 206.0.0:
 - Update to 1.20.6
 - Fix stack data is lost on uncrafting helmet

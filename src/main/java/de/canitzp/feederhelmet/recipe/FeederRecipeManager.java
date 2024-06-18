@@ -31,9 +31,9 @@ public class FeederRecipeManager {
                 if(module.isModuleApplicableTo(helmet.getDefaultInstance())){
                     ResourceLocation helmetKey = BuiltInRegistries.ITEM.getKey(helmet);
                     // create recipe id for creation recipe
-                    ResourceLocation creationCraftingId = new ResourceLocation(FeederHelmet.MODID, module.getTagName() + "_creation_" + helmetKey.getNamespace() + "_" + helmetKey.getPath());
+                    ResourceLocation creationCraftingId = ResourceLocation.fromNamespaceAndPath(FeederHelmet.MODID, module.getTagName() + "_creation_" + helmetKey.getNamespace() + "_" + helmetKey.getPath());
                     // create recipe id for removal recipe
-                    ResourceLocation removalCraftingId = new ResourceLocation(FeederHelmet.MODID, module.getTagName() + "_removal_" + helmetKey.getNamespace() + "_" + helmetKey.getPath());
+                    ResourceLocation removalCraftingId = ResourceLocation.fromNamespaceAndPath(FeederHelmet.MODID, module.getTagName() + "_removal_" + helmetKey.getNamespace() + "_" + helmetKey.getPath());
                     // create recipe for creation
                     Recipe<?> creationRecipe = FeederRecipeManager.creationRecipe(module, helmet);
                     // create recipe for removal
@@ -77,10 +77,10 @@ public class FeederRecipeManager {
         return new ShapelessRecipe("", CraftingBookCategory.EQUIPMENT, outputStack, ingredients){
             // copy nbt tag from helmet to new helmet, also delete SolarHelmet tag
             @Override
-            public ItemStack assemble(CraftingContainer container, HolderLookup.Provider access) {
+            public ItemStack assemble(CraftingInput container, HolderLookup.Provider access) {
                 ItemStack assembled = super.assemble(container, access);
                 ItemStack inputStack = ItemStack.EMPTY;
-                for (int slotId = 0; slotId < container.getContainerSize(); slotId++) {
+                for (int slotId = 0; slotId < container.size(); slotId++) {
                     if(!container.getItem(slotId).isEmpty()){
                         inputStack = container.getItem(slotId).copy();
                         break;
@@ -98,13 +98,13 @@ public class FeederRecipeManager {
 
             // only match if the input helmet has an enabled SolarHelmet module
             @Override
-            public boolean matches(CraftingContainer container, Level level) {
+            public boolean matches(CraftingInput container, Level level) {
                 boolean matches = super.matches(container, level);
                 if(!matches){
                     return false;
                 }
                 ItemStack inputStack = ItemStack.EMPTY;
-                for (int slotId = 0; slotId < container.getContainerSize(); slotId++) {
+                for (int slotId = 0; slotId < container.size(); slotId++) {
                     if(!container.getItem(slotId).isEmpty()){
                         inputStack = container.getItem(slotId);
                         break;
@@ -117,7 +117,7 @@ public class FeederRecipeManager {
             }
 
             @Override
-            public NonNullList<ItemStack> getRemainingItems(CraftingContainer container) {
+            public NonNullList<ItemStack> getRemainingItems(CraftingInput container) {
                 NonNullList<ItemStack> remainingItems = super.getRemainingItems(container);
                 remainingItems.set(0, FeederHelmet.FEEDER_HELMET_MODULE_ITEM.get().getDefaultInstance());
                 return remainingItems;

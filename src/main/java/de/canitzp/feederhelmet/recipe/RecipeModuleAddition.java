@@ -14,6 +14,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SmithingRecipe;
+import net.minecraft.world.item.crafting.SmithingRecipeInput;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
@@ -39,12 +40,12 @@ public record RecipeModuleAddition(Item helmet, String module, ItemStack outputS
     }
 
     @Override
-    public boolean matches(Container container, Level level) {
+    public boolean matches(SmithingRecipeInput container, Level level) {
         return this.isTemplateIngredient(container.getItem(0)) && this.isBaseIngredient(container.getItem(1)) && this.isAdditionIngredient(container.getItem(2));
     }
 
     @Override
-    public ItemStack assemble(Container container, HolderLookup.Provider access) {
+    public ItemStack assemble(SmithingRecipeInput container, HolderLookup.Provider access) {
         ItemStack assembled = this.getResultItem(access).copy();
 
         // copy all components

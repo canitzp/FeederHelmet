@@ -80,7 +80,8 @@ tasks.withType(ProcessResources).configureEach {
             loader_version: "${project.valid_forge_versions}",
             license: "${project.license}",
             mod_id: "${project.mod_id}",
-            mod_version: "${project.mod_version}"
+            mod_version: "${project.mod_version}",
+            mc_version_range: "${project.mc_version_range}"
     ]
     inputs.properties replaceProperties
 
