@@ -3,6 +3,7 @@ package de.canitzp.feederhelmet;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipePropertySet;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 
@@ -21,7 +22,7 @@ public class ItemStackUtil {
     }
     
     public static boolean isSmeltable(Level level, ItemStack stack){
-        return level.getRecipeManager().getAllRecipesFor(RecipeType.SMELTING).stream().anyMatch(furnaceRecipe -> furnaceRecipe.value().getIngredients().stream().anyMatch(ingredient -> ingredient.test(stack)));
+        return level.recipeAccess().propertySet(RecipePropertySet.FURNACE_INPUT).test(stack);
     }
     
     public static boolean isEatable(ItemStack stack){

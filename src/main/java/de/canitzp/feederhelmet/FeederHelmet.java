@@ -2,13 +2,12 @@ package de.canitzp.feederhelmet;
 
 import com.google.common.collect.Lists;
 import com.mojang.serialization.Codec;
+import de.canitzp.feederhelmet.data.localization.FHLocalizationKeys;
 import de.canitzp.feederhelmet.item.ItemFeederModule;
 import de.canitzp.feederhelmet.item.ItemPhotosynthesisModule;
 import de.canitzp.feederhelmet.module.FeederModule;
 import de.canitzp.feederhelmet.module.IHelmetModule;
 import de.canitzp.feederhelmet.module.PhotosynthesisModule;
-import de.canitzp.feederhelmet.recipe.FeederRecipeManager;
-import de.canitzp.feederhelmet.recipe.RecipeModuleAddition;
 import net.minecraft.core.Holder;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponentPatch;
@@ -18,7 +17,9 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ArmorItem;
@@ -27,8 +28,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.EventPriority;
@@ -40,9 +39,11 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.energy.IEnergyStorage;
+import net.neoforged.neoforge.event.entity.item.ItemEvent;
 import net.neoforged.neoforge.event.entity.player.AnvilRepairEvent;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -62,7 +63,7 @@ import java.util.function.Supplier;
 @Mod(FeederHelmet.MODID)
 public class FeederHelmet{
     
-    public static final java.lang.String MODID = "feederhelmet";
+    public static final String MODID = "feederhelmet";
     
     public static final Logger LOGGER = LogManager.getLogger(FeederHelmet.MODID);
 
@@ -70,12 +71,11 @@ public class FeederHelmet{
     public static final Holder<CreativeModeTab> TAB = TABS.register("tab", FeederTab::create);
 
     public static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZER = DeferredRegister.create(Registries.RECIPE_SERIALIZER, MODID);
-    public static final Supplier<RecipeSerializer<RecipeModuleAddition>> MODULE_ADDITION_SERIALIZER = RECIPE_SERIALIZER.register("module_addition", () -> RecipeModuleAddition.Serializer.INSTANCE);
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(BuiltInRegistries.ITEM, MODID);
     public static final Supplier<ItemFeederModule> FEEDER_HELMET_MODULE_ITEM = ITEMS.register("feeder_helmet_module", ItemFeederModule::new);
     public static final Supplier<ItemPhotosynthesisModule> PHOTOSYNTHESIS_MODULE_ITEM = ITEMS.register("photosynthesis_helmet_module", ItemPhotosynthesisModule::new);
 
-    public static final DeferredRegister.DataComponents DATA_COMPONENT_TYPE = DeferredRegister.createDataComponents(MODID);
+    public static final DeferredRegister.DataComponents DATA_COMPONENT_TYPE = DeferredRegister.createDataComponents(Registries.DATA_COMPONENT_TYPE, MODID);
     public static final Supplier<DataComponentType<List<String>>> DC_MODULES = DATA_COMPONENT_TYPE.registerComponentType("modules", listBuilder -> listBuilder.persistent(Codec.STRING.listOf()).networkSynchronized(ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list())).cacheEncoding());
 
     public static final List<IHelmetModule> MODULES = new ArrayList<>();
@@ -107,13 +107,38 @@ public class FeederHelmet{
     }
 
     @SubscribeEvent
-    public static void onWorldLoad(LevelEvent.Load event){
-        LevelAccessor levelAccessor = event.getLevel();
-        if(levelAccessor.isClientSide()){
-            return;
-        }
-        if(levelAccessor instanceof Level level){
-            FeederRecipeManager.injectRecipes(level);
+    public static void onPlayerRightClicks(PlayerInteractEvent.RightClickItem event){
+        ItemStack heldStack = event.getItemStack();
+        if(isItemHelmet(heldStack)){
+            // remove all modules from helmet
+            if(event.getEntity().isShiftKeyDown() && anyModules(heldStack)){
+                event.setCanceled(true);
+                heldStack.getOrDefault(DC_MODULES, new ArrayList<String>()).stream().map(s -> MODULES.stream().filter(iHelmetModule -> iHelmetModule.getTagName().equals(s)).findFirst()).forEach(iHelmetModule -> {
+                    iHelmetModule.ifPresent(iHelmetModule1 -> {
+                        removeModule(heldStack, iHelmetModule1.getTagName());
+                        event.getEntity().displayClientMessage(Component.translatable(FHLocalizationKeys.MODULE_FEEDING_REMOVING_DONE), true);
+                        if (!event.getEntity().addItem(iHelmetModule1.getCorrespondingModuleItem().getDefaultInstance())) {
+                            event.getEntity().drop(iHelmetModule1.getCorrespondingModuleItem().getDefaultInstance(), false);
+                        }
+                    });
+                });
+            }
+        } else {
+            ItemStack helmetStack = event.getEntity().getInventory().getArmor(EquipmentSlot.HEAD.getIndex());
+
+            // add module to wear helmet
+            if(isItemHelmet(helmetStack)){
+                MODULES.stream().filter(iHelmetModule -> heldStack.is(iHelmetModule.getCorrespondingModuleItem())).findFirst().ifPresent(iHelmetModule -> {
+                    if(!hasModule(helmetStack, iHelmetModule.getTagName())){
+                        event.getEntity().displayClientMessage(Component.translatable(FHLocalizationKeys.MODULE_FEEDING_APPLYING_DONE), true);
+                        addModule(helmetStack, iHelmetModule.getTagName());
+                        if(!event.getEntity().isCreative()){
+                            heldStack.shrink(1);
+                        }
+                        event.setCancellationResult(InteractionResult.SUCCESS);
+                    }
+                });
+            }
         }
     }
     
@@ -176,7 +201,7 @@ public class FeederHelmet{
     }
 
     public static boolean isItemHelmet(ItemStack stack){
-        return (stack.getItem() instanceof ArmorItem && ((ArmorItem) stack.getItem()).getType().getSlot() == EquipmentSlot.HEAD && !ItemStackUtil.isHelmetBlacklisted(stack)) || ItemStackUtil.isHelmetWhitelisted(stack);
+        return (stack.getItem() instanceof ArmorItem && stack.getItem().components().get(DataComponents.EQUIPPABLE).slot() == EquipmentSlot.HEAD && !ItemStackUtil.isHelmetBlacklisted(stack)) || ItemStackUtil.isHelmetWhitelisted(stack);
     }
     
     public static boolean canDamageBeReducedOrEnergyConsumed(@Nonnull ItemStack stack){
@@ -202,6 +227,10 @@ public class FeederHelmet{
         }
         
         return canWork.get();
+    }
+
+    public static boolean anyModules(ItemStack stack){
+        return stack.has(DC_MODULES) && !stack.get(DC_MODULES).isEmpty();
     }
 
     public static boolean hasModule(ItemStack stack, String module){

@@ -21,8 +21,6 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 
-minecraft.accessTransformers.file rootProject.file('src/main/resources/META-INF/accesstransformer.cfg')
-
 subsystems {
     parchment {
         minecraftVersion="${parchment_mc_version}"
@@ -43,7 +41,7 @@ runs {
     server {
         workingDirectory project.file('run_server')
         systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
-        programArgument '--nogui'
+        arguments.add '--nogui'
     }
     gameTestServer {
         workingDirectory project.file('run_gametest')
@@ -51,7 +49,7 @@ runs {
     }
     data {
         workingDirectory project.file('run_data')
-        programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+        arguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
     }
 }
 
@@ -121,7 +119,7 @@ modrinth {
     projectId = "lHGxGDJv"
     versionNumber = "${project.mod_version}"
     versionName = "${project.mod_name} - ${project.mod_version} (for ${project.release_minecraft_versions})"
-    versionType = "release"
+    versionType = "beta"
     uploadFile = jar
     gameVersions = project.release_minecraft_versions.split("/").collect()
     loaders = project.release_mod_loaders.toLowerCase().split("/").collect()
@@ -139,7 +137,7 @@ task publishCurseForge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge)
 
     def mainFile = upload(292257, jar)
     mainFile.displayName = "${project.mod_name} - ${project.mod_version} (for ${project.release_minecraft_versions})"
-    mainFile.releaseType = "release"
+    mainFile.releaseType = "beta"
     mainFile.changelogType = 'markdown'
     mainFile.changelog = file("CHANGELOG.md")
     for (final def modloader in "${project.release_mod_loaders}".split("/")) {

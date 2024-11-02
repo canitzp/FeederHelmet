@@ -6,6 +6,7 @@ import de.canitzp.feederhelmet.FeederHelmet;
 import de.canitzp.feederhelmet.ItemStackUtil;
 import de.canitzp.feederhelmet.data.localization.FHLocalizationKeys;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -104,7 +105,7 @@ public class FeederModule implements IHelmetModule{
     private static boolean canPlayerEat(Player player, ItemStack stack){
         if(!stack.isEmpty() && ItemStackUtil.isEatable(stack)){
             if(FeederConfig.GENERAL.WAIT_UNITL_FILL_ALL_HUNGER.get()){
-                return player.getFoodData().getFoodLevel() + stack.getItem().getFoodProperties(stack, player).nutrition() <= 20 || (FeederConfig.GENERAL.IGNORE_WAITING_WHEN_LOW_HEART.get() && player.getHealth() <= 10.0F);
+                return player.getFoodData().getFoodLevel() + stack.getItem().components().get(DataComponents.FOOD).nutrition() <= 20 || (FeederConfig.GENERAL.IGNORE_WAITING_WHEN_LOW_HEART.get() && player.getHealth() <= 10.0F);
             }
             return true;
         }

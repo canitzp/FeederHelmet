@@ -23,7 +23,7 @@ public class FeederData {
         generator.addProvider(event.includeClient(), new FHItemModel(generator, helper));
         generator.addProvider(event.includeClient(), new FHLocalizationUSEnglish(generator.getPackOutput()));
 
-        generator.addProvider(event.includeServer(), new FHRecipeProvider(generator.getPackOutput(), lookupProvider));
+        //generator.addProvider(event.includeServer(), new FHRecipeProvider(lookupProvider.resultNow(), helper.));
     }
 
 }
