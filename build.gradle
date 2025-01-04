@@ -47,7 +47,7 @@ runs {
         workingDirectory project.file('run_gametest')
         systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
     }
-    data {
+    clientData {
         workingDirectory project.file('run_data')
         arguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
     }
@@ -119,7 +119,7 @@ modrinth {
     projectId = "lHGxGDJv"
     versionNumber = "${project.mod_version}"
     versionName = "${project.mod_name} - ${project.mod_version} (for ${project.release_minecraft_versions})"
-    versionType = "beta"
+    versionType = "release"
     uploadFile = jar
     gameVersions = project.release_minecraft_versions.split("/").collect()
     loaders = project.release_mod_loaders.toLowerCase().split("/").collect()
@@ -137,7 +137,7 @@ task publishCurseForge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge)
 
     def mainFile = upload(292257, jar)
     mainFile.displayName = "${project.mod_name} - ${project.mod_version} (for ${project.release_minecraft_versions})"
-    mainFile.releaseType = "beta"
+    mainFile.releaseType = "release"
     mainFile.changelogType = 'markdown'
     mainFile.changelog = file("CHANGELOG.md")
     for (final def modloader in "${project.release_mod_loaders}".split("/")) {

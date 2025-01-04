@@ -1,12 +1,15 @@
 package de.canitzp.feederhelmet.data.localization;
 
 import de.canitzp.feederhelmet.FeederHelmet;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.neoforged.neoforge.common.data.LanguageProvider;
 
+import java.util.concurrent.CompletableFuture;
+
 public class FHLocalizationUSEnglish extends LanguageProvider{
 
-    public FHLocalizationUSEnglish(PackOutput output) {
+    public FHLocalizationUSEnglish(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider) {
         super(output, FeederHelmet.MODID, "en_us");
     }
 

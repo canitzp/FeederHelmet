@@ -1,3 +1,7 @@
+214.0.0:
+- Update to  1.21.4
+- Feeder module recipe now uses a tag for sticks, so other modded sticks can be used too
+
 213.0.0:
 - Update to 1.21.3
 - New module application procedure:
