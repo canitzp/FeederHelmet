@@ -21,8 +21,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -122,7 +122,7 @@ public class FeederHelmet{
                 });
             }
         } else {
-            ItemStack helmetStack = event.getEntity().getInventory().getArmor(EquipmentSlot.HEAD.getIndex());
+            ItemStack helmetStack = getHelmet(event.getEntity());
 
             // add module to wear helmet
             if(isItemHelmet(helmetStack)){
@@ -143,7 +143,7 @@ public class FeederHelmet{
     @SubscribeEvent
     public static void updatePlayer(PlayerTickEvent.Post event){
         if(!event.getEntity().level().isClientSide() && event.getEntity().getCommandSenderWorld().getGameTime() % FeederConfig.GENERAL.WAIT_TICKS.get() == 0){
-            ItemStack helmetStack = event.getEntity().getInventory().armor.get(EquipmentSlot.HEAD.getIndex());
+            ItemStack helmetStack = getHelmet(event.getEntity());
             for(IHelmetModule module : MODULES){
                 if(FeederHelmet.hasModule(helmetStack, module.getTagName())){
                     module.updatePlayer(event.getEntity(), helmetStack);
@@ -154,29 +154,24 @@ public class FeederHelmet{
 
     @SubscribeEvent
     public static void playerJoin(PlayerEvent.PlayerLoggedInEvent event){
-        Player player = event.getEntity();
-        NonNullList<ItemStack> armorInventory = player.getInventory().armor;
-        NonNullList<ItemStack> mainInventory = player.getInventory().items;
-        NonNullList<ItemStack> offHandInventory = player.getInventory().offhand;
-
         NonNullList<ItemStack> mergedInventory = NonNullList.create();
-        mergedInventory.addAll(armorInventory);
-        mergedInventory.addAll(mainInventory);
-        mergedInventory.addAll(offHandInventory);
+        for (ItemStack itemStack : event.getEntity().getInventory()) {
+            mergedInventory.add(itemStack);
+        }
 
         for(ItemStack stack : mergedInventory){
             if(stack.has(DataComponents.CUSTOM_DATA)){
                 CompoundTag tag = stack.get(DataComponents.CUSTOM_DATA).copyTag();
                 List<String> foundModules = new ArrayList<>();
                 // update from ancient versions
-                if(tag.contains("AutoFeederHelmet", Tag.TAG_BYTE)){
+                if(tag.contains("AutoFeederHelmet")){
                     foundModules.add("feeder_module");
                     tag.remove("AutoFeederHelmet");
                     stack.applyComponents(DataComponentPatch.builder().set(DataComponents.CUSTOM_DATA, CustomData.of(tag)).build());
                 }
                 // update from pre 1.20.6 versions
-                if(tag.contains("modules", Tag.TAG_LIST)){
-                    tag.getList("modules", Tag.TAG_STRING).forEach(tag1 -> foundModules.add(tag1.getAsString()));
+                if(tag.contains("modules")){
+                    tag.getListOrEmpty("modules").forEach(tag1 -> foundModules.add(tag1.toString()));
                     tag.remove("modules");
                     stack.applyComponents(DataComponentPatch.builder().set(DataComponents.CUSTOM_DATA, CustomData.of(tag)).build());
                 }
@@ -199,7 +194,7 @@ public class FeederHelmet{
     }
 
     public static boolean isItemHelmet(ItemStack stack){
-        return (stack.getItem() instanceof ArmorItem && stack.getItem().components().get(DataComponents.EQUIPPABLE).slot() == EquipmentSlot.HEAD && !ItemStackUtil.isHelmetBlacklisted(stack)) || ItemStackUtil.isHelmetWhitelisted(stack);
+        return (stack.getItem().components().get(DataComponents.EQUIPPABLE).slot() == EquipmentSlot.HEAD && !ItemStackUtil.isHelmetBlacklisted(stack)) || ItemStackUtil.isHelmetWhitelisted(stack);
     }
     
     public static boolean canDamageBeReducedOrEnergyConsumed(@Nonnull ItemStack stack){
@@ -253,6 +248,10 @@ public class FeederHelmet{
             modules.remove(module);
             stack.set(DC_MODULES, modules);
         }
+    }
+
+    public static ItemStack getHelmet(Player player){
+        return player.getInventory().getItem(Inventory.INVENTORY_SIZE + EquipmentSlot.HEAD.getIndex());
     }
 
 }

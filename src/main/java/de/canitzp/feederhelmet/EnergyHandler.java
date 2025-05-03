@@ -20,22 +20,22 @@ public abstract class EnergyHandler {
 
         CompoundTag tag = stack.get(DataComponents.CUSTOM_DATA).copyTag();
 
-        if(tag.contains("Energy", Tag.TAG_INT)){
+        if(tag.contains("Energy")){
             return new Simple(stack, tag, "Energy");
         }
-        if(tag.contains("energy", Tag.TAG_INT)){
+        if(tag.contains("energy")){
             return new Simple(stack, tag, "energy");
         }
-        if(tag.contains("enderio.darksteel.upgrade.energyUpgrade", Tag.TAG_COMPOUND)){
+        if(tag.contains("enderio.darksteel.upgrade.energyUpgrade")){
             return new EnderIOEnergyUpgrade(stack, tag);
         }
-        if(tag.contains("mekData", Tag.TAG_COMPOUND)){
-            CompoundTag mekData = tag.getCompound("mekData");
-            if(mekData.contains("EnergyContainers", Tag.TAG_LIST)){
-                return new MekanismMekaSuit(stack, tag, mekData.getList("EnergyContainers", Tag.TAG_COMPOUND));
+        if(tag.contains("mekData")){
+            CompoundTag mekData = tag.getCompoundOrEmpty("mekData");
+            if(mekData.contains("EnergyContainers")){
+                return new MekanismMekaSuit(stack, tag, mekData.getListOrEmpty("EnergyContainers"));
             }
         }
-        if(tag.contains("charge", Tag.TAG_DOUBLE)){
+        if(tag.contains("charge")){
             return new IC2(stack, tag);
         }
         return null;
@@ -61,7 +61,7 @@ public abstract class EnergyHandler {
         public Simple(ItemStack stack, CompoundTag tag, String tagName) {
             super(stack, tag);
             this.tagName = tagName;
-            this.energy = tag.getInt(this.tagName);
+            this.energy = tag.getIntOr(this.tagName, 0);
         }
 
         @Override
@@ -83,7 +83,7 @@ public abstract class EnergyHandler {
 
         public EnderIOEnergyUpgrade(ItemStack stack, CompoundTag tag) {
             super(stack, tag);
-            this.energy = tag.getCompound("enderio.darksteel.upgrade.energyUpgrade").getInt("energy");
+            this.energy = tag.getCompound("enderio.darksteel.upgrade.energyUpgrade").get().getIntOr("energy", 0);
         }
 
         @Override
@@ -94,7 +94,7 @@ public abstract class EnergyHandler {
 
         @Override
         public void use() {
-            super.tag.getCompound("enderio.darksteel.upgrade.energyUpgrade").putInt("energy", this.energyAfterUsage);
+            super.tag.getCompoundOrEmpty("enderio.darksteel.upgrade.energyUpgrade").putInt("energy", this.energyAfterUsage);
             super.stack.applyComponents(DataComponentPatch.builder().set(DataComponents.CUSTOM_DATA, CustomData.of(super.tag)).build());
         }
     }
@@ -109,7 +109,7 @@ public abstract class EnergyHandler {
             this.tagEnergyContainers = tagEnergyContainers;
             for (Tag energyContainer : tagEnergyContainers) {
                 if(energyContainer instanceof CompoundTag compound){
-                    String storedAsString = compound.getString("stored");
+                    String storedAsString = compound.getStringOr("stored", "0");
                     if (NumberUtils.isParsable(storedAsString)) {
                         this.energy += NumberUtils.toInt(storedAsString, 0);
                     }
@@ -129,7 +129,7 @@ public abstract class EnergyHandler {
             this.energyToExtract = Math.round(this.energyToExtract * 2.5F); // energy conversion from RF/FE to MJ
             for (Tag energyContainer : this.tagEnergyContainers) {
                 if(energyContainer instanceof CompoundTag compound){
-                    String storedAsString = compound.getString("stored");
+                    String storedAsString = compound.getStringOr("stored", "0");
                     int stored = 0;
                     if(NumberUtils.isParsable(storedAsString)){
                         stored = NumberUtils.toInt(storedAsString, 0);
@@ -156,7 +156,7 @@ public abstract class EnergyHandler {
 
         public IC2(ItemStack stack, CompoundTag tag) {
             super(stack, tag);
-            this.energy = tag.getDouble("charge");
+            this.energy = tag.getDoubleOr("charge", 0D);
         }
 
         @Override

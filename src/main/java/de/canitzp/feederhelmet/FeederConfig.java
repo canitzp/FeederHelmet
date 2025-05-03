@@ -2,7 +2,6 @@ package de.canitzp.feederhelmet;
 
 import com.google.common.collect.Lists;
 import net.neoforged.neoforge.common.ModConfigSpec;
-import net.neoforged.neoforge.common.NeoForgeConfig;
 
 import java.util.ArrayList;
 import java.util.List;

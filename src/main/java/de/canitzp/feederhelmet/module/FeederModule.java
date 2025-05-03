@@ -8,6 +8,7 @@ import de.canitzp.feederhelmet.data.localization.FHLocalizationKeys;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -47,7 +48,7 @@ public class FeederModule implements IHelmetModule{
     @Override
     public void updatePlayer(Player player, ItemStack helmetStack){
         if(!player.getAbilities().invulnerable && player.canEat(false) && FeederHelmet.canDamageBeReducedOrEnergyConsumed(helmetStack)){
-            for(ItemStack inventoryStack : player.getInventory().items){
+            for(ItemStack inventoryStack : player.getInventory().getNonEquipmentItems()){
                 if(!FeederModule.canHelmetEatStack(player.level(), inventoryStack) || !FeederModule.canPlayerEat(player, inventoryStack) || !player.canEat(false)){
                     continue;
                 }
@@ -75,7 +76,7 @@ public class FeederModule implements IHelmetModule{
                     canEat.set(true);
                 }
                 if(canEat.get()){
-                    EventHooks.onItemUseStart(player, inventoryStack, 0);
+                    EventHooks.onItemUseStart(player, inventoryStack, InteractionHand.MAIN_HAND, 0);
                     ItemStack result = inventoryStack.getItem().finishUsingItem(inventoryStack, player.getCommandSenderWorld(), player);
                     EventHooks.onItemUseFinish(player, inventoryStack, 0, result);
                     break;

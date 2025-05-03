@@ -10,8 +10,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public class ItemPhotosynthesisModule extends Item {
     
@@ -20,8 +22,7 @@ public class ItemPhotosynthesisModule extends Item {
     }
     
     @Override
-    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flagIn) {
-        super.appendHoverText(stack, context, tooltip, flagIn);
-        tooltip.add(Component.translatable(FHLocalizationKeys.MODULE_PHOTOSYNTHESIS_DESCRIPTION).setStyle(Style.EMPTY.applyFormats(ChatFormatting.GRAY)));
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> tooltip, TooltipFlag flag) {
+        tooltip.accept(Component.translatable(FHLocalizationKeys.MODULE_PHOTOSYNTHESIS_DESCRIPTION).setStyle(Style.EMPTY.applyFormats(ChatFormatting.GRAY)));
     }
 }
