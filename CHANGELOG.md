@@ -1,3 +1,9 @@
+218.0.0 (2025-09-29):
+- Update to 1.21.8
+- Add one more tooltip to explain how to remove the module.
+- Completely disable photosynthesis module
+- Module can't be applied to Mob heads from now on (except when head is whitelisted)
+
 215.0.0 (2025-05-03):
 - Update to 1.21.5
 

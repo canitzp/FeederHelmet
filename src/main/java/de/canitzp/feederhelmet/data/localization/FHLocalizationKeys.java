@@ -4,6 +4,7 @@ public final class FHLocalizationKeys {
 
     public static final String TAB = "tab.feederhelmet:general";
     public static final String MODULE_FEEDING_DESCRIPTION = "item.feederhelmet:feeder_helmet_module.desc";
+    public static final String MODULE_FEEDING_INSTALLED_DESCRIPTION = "item.feederhelmet:feeder_helmet_module_installed_description.text";
     public static final String MODULE_FEEDING_INSTALLED = "item.feederhelmet:feeder_helmet_module_installed.text";
     public static final String MODULE_FEEDING_REMOVING_DONE = "item.feederhelmet:feeder_helmet_module_removing_done.text";
     public static final String MODULE_FEEDING_APPLYING_DONE = "item.feederhelmet:feeder_helmet_module_applying_done.text";

@@ -19,11 +19,12 @@ public class FHLocalizationUSEnglish extends LanguageProvider{
 
         this.add(FeederHelmet.FEEDER_HELMET_MODULE_ITEM.get(), "Feeder Helmet Module");
         this.add(FHLocalizationKeys.MODULE_FEEDING_DESCRIPTION, "Right click in World, while wearing helmet, to apply this module to the helmet.");
-        this.add(FHLocalizationKeys.MODULE_FEEDING_INSTALLED, "Auto feeding mode");
+        this.add(FHLocalizationKeys.MODULE_FEEDING_INSTALLED_DESCRIPTION, "Sneak+Right click helmet onto block to remove.");
+        this.add(FHLocalizationKeys.MODULE_FEEDING_INSTALLED, "Auto feeding mode.");
         this.add(FHLocalizationKeys.MODULE_FEEDING_APPLYING_DONE, "Auto Feeder Module installed");
         this.add(FHLocalizationKeys.MODULE_FEEDING_REMOVING_DONE, "Auto Feeder Module removed");
 
-        this.add(FeederHelmet.PHOTOSYNTHESIS_MODULE_ITEM.get(), "Photosynthesis Helmet Module");
+        //this.add(FeederHelmet.PHOTOSYNTHESIS_MODULE_ITEM.get(), "Photosynthesis Helmet Module");
         this.add(FHLocalizationKeys.MODULE_PHOTOSYNTHESIS_DESCRIPTION, "Can't be crafted and has no function yet!");
         this.add(FHLocalizationKeys.MODULE_PHOTOSYNTHESIS_INSTALLED, "Photosynthesis Module");
     }

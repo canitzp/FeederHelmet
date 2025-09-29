@@ -4,8 +4,7 @@ plugins {
     id "java-library"
     id "idea"
     id "maven-publish"
-    id 'net.neoforged.gradle.userdev' version '7.0.+'
-    //id 'org.parchmentmc.librarian.forgegradle' version '1.+'
+    id 'net.neoforged.moddev' version '2.0.107'
     id "com.modrinth.minotaur" version "2.+"
     id 'net.darkhax.curseforgegradle' version '1.+'
 }
@@ -21,35 +20,41 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 
-subsystems {
-    parchment {
-        minecraftVersion="${parchment_mc_version}"
-        mappingsVersion="${parchment_mapping_version}"
-    }
-}
+neoForge {
+    version = project.forge_version
 
-runs {
-    configureEach {
-        //systemProperty 'forge.logging.markers', 'REGISTRIES'
-        systemProperty 'forge.logging.console.level', 'debug'
-        modSource project.sourceSets.main
+    parchment {
+        mappingsVersion = project.parchment_mapping_version
+        minecraftVersion = project.parchment_mc_version
     }
-    client {
-        workingDirectory project.file('run')
-        systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
+
+    runs {
+        configureEach {
+            //systemProperty 'forge.logging.markers', 'REGISTRIES'
+            logLevel = org.slf4j.event.Level.DEBUG
+        }
+        client {
+            client()
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+        server {
+            server()
+            programArgument '--nogui'
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+        gameTestServer {
+            type = "gameTestServer"
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+        data {
+            clientData()
+            programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+        }
     }
-    server {
-        workingDirectory project.file('run_server')
-        systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
-        arguments.add '--nogui'
-    }
-    gameTestServer {
-        workingDirectory project.file('run_gametest')
-        systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
-    }
-    clientData {
-        workingDirectory project.file('run_data')
-        arguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+    mods {
+        "${mod_id}" {
+            sourceSet(sourceSets.main)
+        }
     }
 }
 
@@ -68,11 +73,12 @@ repositories {
 }
 
 dependencies {
-    implementation "net.neoforged:neoforge:${project.forge_version}"
     //implementation fg.deobf("mezz.jei:jei-${project.jei_version}")
 }
 
-tasks.withType(ProcessResources).configureEach {
+// This block of code expands all declared replace properties in the specified resource targets.
+// A missing property will result in an error. Properties are expanded using ${} Groovy notation.
+var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
     var replaceProperties = [
             mod_loader: "javafml",
             loader_version: "${project.valid_forge_versions}",
@@ -82,11 +88,15 @@ tasks.withType(ProcessResources).configureEach {
             mc_version_range: "${project.mc_version_range}"
     ]
     inputs.properties replaceProperties
-
-    filesMatching(['META-INF/neoforge.mods.toml', 'pack.mcmeta']) {
-        expand replaceProperties
-    }
+    expand replaceProperties
+    from "src/main/templates"
+    into "build/generated/sources/modMetadata"
 }
+// Include the output of "generateModMetadata" as an input directory for the build
+// this works with both building through Gradle and the IDE.
+sourceSets.main.resources.srcDir generateModMetadata
+// To avoid having to run "generateModMetadata" manually, make it run on every project reload
+neoForge.ideSyncTask generateModMetadata
 
 jar {
     manifest {

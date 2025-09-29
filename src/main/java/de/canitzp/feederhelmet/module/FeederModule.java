@@ -39,9 +39,13 @@ public class FeederModule implements IHelmetModule{
     public boolean isModuleApplicableTo(ItemStack stack){
         return FeederHelmet.isItemHelmet(stack);
     }
-    
+
     @Override
     public void renderTooltip(@Nonnull ItemStack stack, @Nullable Player entityPlayer, List<Component> list, TooltipFlag flags){
+        int i = list.indexOf(Component.empty());
+        list.add(i + 1, Component.translatable(FHLocalizationKeys.MODULE_FEEDING_INSTALLED_DESCRIPTION).withStyle(ChatFormatting.GRAY));
+        list.add(i + 2, Component.empty());
+
         list.add(Component.translatable(FHLocalizationKeys.MODULE_FEEDING_INSTALLED).withStyle(ChatFormatting.YELLOW, ChatFormatting.ITALIC));
     }
     
@@ -77,7 +81,7 @@ public class FeederModule implements IHelmetModule{
                 }
                 if(canEat.get()){
                     EventHooks.onItemUseStart(player, inventoryStack, InteractionHand.MAIN_HAND, 0);
-                    ItemStack result = inventoryStack.getItem().finishUsingItem(inventoryStack, player.getCommandSenderWorld(), player);
+                    ItemStack result = inventoryStack.getItem().finishUsingItem(inventoryStack, player.level(), player);
                     EventHooks.onItemUseFinish(player, inventoryStack, 0, result);
                     break;
                 }

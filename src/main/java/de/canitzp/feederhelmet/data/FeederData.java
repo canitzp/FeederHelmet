@@ -7,7 +7,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 
 
-@EventBusSubscriber(modid = FeederHelmet.MODID, bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = FeederHelmet.MODID)
 public class FeederData {
 
     @SubscribeEvent

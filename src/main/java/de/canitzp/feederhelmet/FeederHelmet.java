@@ -4,10 +4,8 @@ import com.google.common.collect.Lists;
 import com.mojang.serialization.Codec;
 import de.canitzp.feederhelmet.data.localization.FHLocalizationKeys;
 import de.canitzp.feederhelmet.item.ItemFeederModule;
-import de.canitzp.feederhelmet.item.ItemPhotosynthesisModule;
 import de.canitzp.feederhelmet.module.FeederModule;
 import de.canitzp.feederhelmet.module.IHelmetModule;
-import de.canitzp.feederhelmet.module.PhotosynthesisModule;
 import net.minecraft.core.Holder;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponentPatch;
@@ -16,20 +14,15 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.*;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -39,7 +32,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.energy.IEnergyStorage;
-import net.neoforged.neoforge.event.entity.player.AnvilRepairEvent;
+import net.neoforged.neoforge.event.entity.player.AnvilCraftEvent;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
@@ -71,7 +64,7 @@ public class FeederHelmet{
     public static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZER = DeferredRegister.create(Registries.RECIPE_SERIALIZER, MODID);
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(BuiltInRegistries.ITEM, MODID);
     public static final Supplier<ItemFeederModule> FEEDER_HELMET_MODULE_ITEM = ITEMS.register("feeder_helmet_module", ItemFeederModule::new);
-    public static final Supplier<ItemPhotosynthesisModule> PHOTOSYNTHESIS_MODULE_ITEM = ITEMS.register("photosynthesis_helmet_module", ItemPhotosynthesisModule::new);
+    // public static final Supplier<ItemPhotosynthesisModule> PHOTOSYNTHESIS_MODULE_ITEM = ITEMS.register("photosynthesis_helmet_module", ItemPhotosynthesisModule::new);
 
     public static final DeferredRegister.DataComponents DATA_COMPONENT_TYPE = DeferredRegister.createDataComponents(Registries.DATA_COMPONENT_TYPE, MODID);
     public static final Supplier<DataComponentType<List<String>>> DC_MODULES = DATA_COMPONENT_TYPE.registerComponentType("modules", listBuilder -> listBuilder.persistent(Codec.STRING.listOf()).networkSynchronized(ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list())).cacheEncoding());
@@ -81,7 +74,7 @@ public class FeederHelmet{
     public FeederHelmet(IEventBus modEventBus, ModContainer modContainer) {
         LOGGER.info("Feeder Helmet loading...");
         MODULES.add(new FeederModule());
-        MODULES.add(new PhotosynthesisModule());
+        //MODULES.add(new PhotosynthesisModule());
 
         modContainer.registerConfig(ModConfig.Type.COMMON, FeederConfig.spec);
 
@@ -91,10 +84,9 @@ public class FeederHelmet{
         DATA_COMPONENT_TYPE.register(modEventBus);
         LOGGER.info("Feeder Helmet loaded.");
     }
-    
-    @OnlyIn(Dist.CLIENT)
+
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void renderTooltips(ItemTooltipEvent event){
+    public static void renderTooltipsLowest(ItemTooltipEvent event){
         if(!event.getItemStack().isEmpty()){
             for(IHelmetModule module : MODULES){
                 if(FeederHelmet.hasModule(event.getItemStack(), module.getTagName())){
@@ -142,7 +134,7 @@ public class FeederHelmet{
     
     @SubscribeEvent
     public static void updatePlayer(PlayerTickEvent.Post event){
-        if(!event.getEntity().level().isClientSide() && event.getEntity().getCommandSenderWorld().getGameTime() % FeederConfig.GENERAL.WAIT_TICKS.get() == 0){
+        if(!event.getEntity().level().isClientSide() && event.getEntity().level().getGameTime() % FeederConfig.GENERAL.WAIT_TICKS.get() == 0){
             ItemStack helmetStack = getHelmet(event.getEntity());
             for(IHelmetModule module : MODULES){
                 if(FeederHelmet.hasModule(helmetStack, module.getTagName())){
@@ -184,7 +176,7 @@ public class FeederHelmet{
     
     // copy modules nbt from old to ew item stack
     @SubscribeEvent
-    public static void anvilRepair(AnvilRepairEvent event){
+    public static void anvilRepair(AnvilCraftEvent.Pre event){
         ItemStack toRepair = event.getLeft();
         ItemStack result = event.getOutput();
 
@@ -194,7 +186,19 @@ public class FeederHelmet{
     }
 
     public static boolean isItemHelmet(ItemStack stack){
-        return (stack.getItem().components().get(DataComponents.EQUIPPABLE).slot() == EquipmentSlot.HEAD && !ItemStackUtil.isHelmetBlacklisted(stack)) || ItemStackUtil.isHelmetWhitelisted(stack);
+        if(ItemStackUtil.isHelmetWhitelisted(stack)){
+            return true;
+        }
+        if(ItemStackUtil.isHelmetBlacklisted(stack)){
+            return false;
+        }
+        if(stack.getItem() instanceof StandingAndWallBlockItem){ // Heads
+            return false;
+        }
+        if(!stack.has(DataComponents.EQUIPPABLE)){
+            return false;
+        }
+        return stack.get(DataComponents.EQUIPPABLE).slot() == EquipmentSlot.HEAD;
     }
     
     public static boolean canDamageBeReducedOrEnergyConsumed(@Nonnull ItemStack stack){

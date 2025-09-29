@@ -19,7 +19,7 @@ public class FHItemModel extends ModelProvider {
     @Override
     protected void registerModels(BlockModelGenerators blockModels, ItemModelGenerators itemModels) {
         itemModels.generateFlatItem(FeederHelmet.FEEDER_HELMET_MODULE_ITEM.get(), ModelTemplates.FLAT_ITEM);
-        itemModels.generateFlatItem(FeederHelmet.PHOTOSYNTHESIS_MODULE_ITEM.get(), ModelTemplates.FLAT_ITEM);
+        //itemModels.generateFlatItem(FeederHelmet.PHOTOSYNTHESIS_MODULE_ITEM.get(), ModelTemplates.FLAT_ITEM);
         //super.registerModels(blockModels, itemModels);
     }
 
