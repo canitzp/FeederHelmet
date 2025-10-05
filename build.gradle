@@ -1,5 +1,3 @@
-import java.util.stream.Stream
-
 plugins {
     id "java-library"
     id "idea"

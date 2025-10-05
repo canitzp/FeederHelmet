@@ -16,6 +16,7 @@
 | 1.17.x  |   Forge   |       ❌        |
 | 1.16.x  |   Forge   |       ❌        |
 | 1.12.x  |   Forge   |       ❌        |
+
 ⚠️: bug fix only
 
 ### About
