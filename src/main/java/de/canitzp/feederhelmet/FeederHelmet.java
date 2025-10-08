@@ -31,13 +31,14 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.energy.IEnergyStorage;
 import net.neoforged.neoforge.event.entity.player.AnvilCraftEvent;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.transfer.access.ItemAccess;
+import net.neoforged.neoforge.transfer.energy.EnergyHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -203,9 +204,9 @@ public class FeederHelmet{
     
     public static boolean canDamageBeReducedOrEnergyConsumed(@Nonnull ItemStack stack){
         AtomicBoolean canWork = new AtomicBoolean(false);
-        
-        IEnergyStorage energyCapability = stack.getCapability(Capabilities.EnergyStorage.ITEM);
-        if(energyCapability != null){
+
+        EnergyHandler energyHandler = ItemAccess.forStack(stack).getCapability(Capabilities.Energy.ITEM);
+        if(energyHandler != null){
             canWork.set(true);
         }
         

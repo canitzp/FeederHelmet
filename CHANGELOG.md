@@ -1,3 +1,7 @@
+21.10.0 ():
+- Again changed numbering a bit, due to the old number would be 2110, which is far away from the previous 218
+- Update to 1.21.10
+
 218.0.0 (2025-09-29):
 - Update to 1.21.8
 - Add one more tooltip to explain how to remove the module.
