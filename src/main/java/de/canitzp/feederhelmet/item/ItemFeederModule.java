@@ -5,8 +5,8 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -20,8 +20,8 @@ import java.util.function.Consumer;
  */
 public class ItemFeederModule extends Item {
 
-    public ItemFeederModule(ResourceLocation resourceLocation){
-        super(new Properties().setId(ResourceKey.create(Registries.ITEM, resourceLocation)).useItemDescriptionPrefix().stacksTo(1));
+    public ItemFeederModule(Identifier identifier){
+        super(new Properties().setId(ResourceKey.create(Registries.ITEM, identifier)).useItemDescriptionPrefix().stacksTo(1));
     }
 
     @Override

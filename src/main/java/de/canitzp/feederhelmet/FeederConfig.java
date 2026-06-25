@@ -10,7 +10,6 @@ public class FeederConfig {
     
     private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
     public static final General GENERAL = new General(BUILDER);
-    public static final PhotosynthesisModule PHOTOSYNTHESIS_MODULE = new PhotosynthesisModule(BUILDER);
     public static final ModConfigSpec spec = BUILDER.build();
 
     // todo reorganize when breaking change
@@ -86,11 +85,5 @@ public class FeederConfig {
             builder.pop();
         }
     }
-    
-    public static class PhotosynthesisModule {
-        public PhotosynthesisModule(ModConfigSpec.Builder builder) {
-        
-        }
-    }
-    
+
 }

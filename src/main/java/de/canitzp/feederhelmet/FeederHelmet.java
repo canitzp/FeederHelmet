@@ -65,7 +65,6 @@ public class FeederHelmet{
     public static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZER = DeferredRegister.create(Registries.RECIPE_SERIALIZER, MODID);
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(BuiltInRegistries.ITEM, MODID);
     public static final Supplier<ItemFeederModule> FEEDER_HELMET_MODULE_ITEM = ITEMS.register("feeder_helmet_module", ItemFeederModule::new);
-    // public static final Supplier<ItemPhotosynthesisModule> PHOTOSYNTHESIS_MODULE_ITEM = ITEMS.register("photosynthesis_helmet_module", ItemPhotosynthesisModule::new);
 
     public static final DeferredRegister.DataComponents DATA_COMPONENT_TYPE = DeferredRegister.createDataComponents(Registries.DATA_COMPONENT_TYPE, MODID);
     public static final Supplier<DataComponentType<List<String>>> DC_MODULES = DATA_COMPONENT_TYPE.registerComponentType("modules", listBuilder -> listBuilder.persistent(Codec.STRING.listOf()).networkSynchronized(ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list())).cacheEncoding());
@@ -75,7 +74,6 @@ public class FeederHelmet{
     public FeederHelmet(IEventBus modEventBus, ModContainer modContainer) {
         LOGGER.info("Feeder Helmet loading...");
         MODULES.add(new FeederModule());
-        //MODULES.add(new PhotosynthesisModule());
 
         modContainer.registerConfig(ModConfig.Type.COMMON, FeederConfig.spec);
 

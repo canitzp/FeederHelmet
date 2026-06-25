@@ -4,11 +4,14 @@
 ### Support:
 | Version | Modloader | Support-Status |
 |:-------:|:---------:|:--------------:|
-| 1.21.10 | NeoForge  |       ✅        |
-| 1.21.8  | NeoForge  |       ✅        |
-| 1.21.5  | NeoForge  |       ⚠️       |
-| 1.21.4  | NeoForge  |       ⚠️       |
-| 1.21.3  | NeoForge  |       ⚠️       |
+|  26.2   | NeoForge  |  coming soon️  |
+| 26.1.2  | NeoForge  |  coming soon️  |
+| 1.21.11 | NeoForge  |       ⚠️       |
+| 1.21.10 | NeoForge  |       ⚠️       |
+| 1.21.8  | NeoForge  |       ❌        |
+| 1.21.5  | NeoForge  |       ❌        |
+| 1.21.4  | NeoForge  |       ❌        |
+| 1.21.3  | NeoForge  |       ❌        |
 | 1.21.1  | NeoForge  |       ⚠️       |
 |  1.21   | NeoForge  |       ❌        |
 | 1.20.x  |   Forge   |       ❌        |

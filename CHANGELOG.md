@@ -1,4 +1,7 @@
-21.10.0 ():
+21.11.0 (2026-06-25):
+- Update to Minecraft 1.21.11
+
+21.10.0 (2025-10-08):
 - Again changed numbering a bit, due to the old number would be 2110, which is far away from the previous 218
 - Update to 1.21.10
 
