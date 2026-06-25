@@ -5,7 +5,7 @@
 | Version | Modloader | Support-Status |
 |:-------:|:---------:|:--------------:|
 |  26.2   | NeoForge  |  coming soon️  |
-| 26.1.2  | NeoForge  |  coming soon️  |
+| 26.1.2  | NeoForge  |       ✅        |
 | 1.21.11 | NeoForge  |       ⚠️       |
 | 1.21.10 | NeoForge  |       ⚠️       |
 | 1.21.8  | NeoForge  |       ❌        |

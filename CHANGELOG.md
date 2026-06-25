@@ -1,3 +1,7 @@
+26.1.2.**1** (2026-06-25):
+- Update to Minecraft 26.1.2
+- Added forth number to version, to use same system as neoforge
+
 21.11.0 (2026-06-25):
 - Update to Minecraft 1.21.11
 

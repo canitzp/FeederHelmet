@@ -105,7 +105,7 @@ public class FeederHelmet{
                 heldStack.getOrDefault(DC_MODULES, new ArrayList<String>()).stream().map(s -> MODULES.stream().filter(iHelmetModule -> iHelmetModule.getTagName().equals(s)).findFirst()).forEach(iHelmetModule -> {
                     iHelmetModule.ifPresent(iHelmetModule1 -> {
                         removeModule(heldStack, iHelmetModule1.getTagName());
-                        event.getEntity().displayClientMessage(Component.translatable(FHLocalizationKeys.MODULE_FEEDING_REMOVING_DONE), true);
+                        event.getEntity().sendOverlayMessage(Component.translatable(FHLocalizationKeys.MODULE_FEEDING_REMOVING_DONE));
                         if (!event.getEntity().addItem(iHelmetModule1.getCorrespondingModuleItem().getDefaultInstance())) {
                             event.getEntity().drop(iHelmetModule1.getCorrespondingModuleItem().getDefaultInstance(), false);
                         }
@@ -119,7 +119,7 @@ public class FeederHelmet{
             if(isItemHelmet(helmetStack)){
                 MODULES.stream().filter(iHelmetModule -> heldStack.is(iHelmetModule.getCorrespondingModuleItem())).findFirst().ifPresent(iHelmetModule -> {
                     if(!hasModule(helmetStack, iHelmetModule.getTagName())){
-                        event.getEntity().displayClientMessage(Component.translatable(FHLocalizationKeys.MODULE_FEEDING_APPLYING_DONE), true);
+                        event.getEntity().sendOverlayMessage(Component.translatable(FHLocalizationKeys.MODULE_FEEDING_APPLYING_DONE));
                         addModule(helmetStack, iHelmetModule.getTagName());
                         if(!event.getEntity().isCreative()){
                             heldStack.shrink(1);
